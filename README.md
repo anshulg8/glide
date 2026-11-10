@@ -41,19 +41,22 @@ Glide was engineered with an uncompromising focus on native speed, simplicity, a
 
 ---
 
-## 📥 Direct Download & Installation
+## 📥 Download & Quick Start
 
-You do **not** need to compile the app yourself to use Glide:
+You do **not** need to compile Glide yourself to use it:
 
-1. Download the latest **[`Glide.zip`](https://github.com/anshulg8/glide/releases/latest)** from GitHub Releases.
-2. Double-click `Glide.zip` to extract **`Glide.app`**.
-3. **Move to Applications**:
-   - Drag `Glide.app` into your **Applications** folder.
-   - *(Or open it directly in Downloads — Glide will automatically detect this on launch and offer to move itself to Applications for you!)*
-4. **Open for the First Time (Gatekeeper)**:
-   - Because Glide is free open-source software and not notarized through a paid Apple Developer subscription ($99/yr), macOS will ask to confirm on first launch.
-   - Simply **Right-click** (or Control-click) `Glide.app` in Applications and choose **Open**, then click **Open** on the confirmation dialog. (You only have to do this once).
-   - *Alternative (Terminal)*: Run `xattr -cr /Applications/Glide.app`
+1. **Download**: Get the latest **[`Glide.zip`](https://github.com/anshulg8/glide/releases/latest)** from GitHub Releases.
+2. **Install**: Double-click `Glide.zip` to extract, then drag **`Glide.app`** into your **Applications** folder.  
+   *(Or open it directly in Downloads — Glide will automatically offer to move itself to Applications for you!)*
+3. **First Launch (macOS Gatekeeper)**:  
+   Because Glide is free, open-source software and not notarized through a paid Apple Developer subscription ($99/year), macOS will show a standard first-launch warning:
+   - **System Settings (Standard macOS 15 Sequoia flow)**:  
+     Double-click `Glide.app` → click **Done** on the warning → open **System Settings** → **Privacy & Security** → scroll down to **Security** → click **Open Anyway**.
+   - **Terminal (Fastest one-liner)**:  
+     ```bash
+     xattr -cr /Applications/Glide.app
+     ```
+   *(You only need to approve it once; macOS permanently remembers it thereafter).*
 
 ---
 
@@ -80,33 +83,6 @@ Glide communicates directly with Apple's low-level Multitouch and Display framew
 - **macOS 14.0 (Sonoma)** or newer (including **macOS 15 Sequoia**).
 
 > **Note on Screen Brightness**: Display brightness control communicates directly with built-in laptop displays and Apple Studio Display / Pro Display XDR via Apple's native `DisplayServices.framework`. System volume control works across all audio output devices (built-in speakers, headphones, AirPods, HDMI, external DACs).
-
----
-
-## 🛡️ First Launch (Gatekeeper Notice on macOS 15 Sequoia / Sonoma)
-
-Because Glide is a free, open-source utility and is not notarized through a paid Apple Developer subscription ($99/year), macOS Gatekeeper displays a warning on first launch when downloaded from the internet:
-> *"Glide cannot be opened because Apple cannot check it for malicious software."* (with options: *Done* / *Move to Trash*)
-
-This is standard macOS Gatekeeper behavior for all open-source software. You only need to approve it **once** using either method:
-
-### Method 1: System Settings (Standard macOS 15 Sequoia flow)
-1. Double-click `Glide.app`. When the warning appears, click **Done** (or *Cancel*).
-2. Open **System Settings** → **Privacy & Security**.
-3. Scroll down to the **Security** section.
-4. You will see: *"Glide" was blocked from use because it is not from an identified developer.*
-5. Click **Open Anyway**, authenticate with Touch ID / password, and click **Open**.
-
-### Method 2: Terminal One-Liner (Fastest)
-Open Terminal and remove the browser download quarantine attribute:
-```bash
-# If you moved it to Applications:
-xattr -cr /Applications/Glide.app
-
-# Or if it's still in Downloads:
-xattr -cr ~/Downloads/Glide.app
-```
-Then double-click `Glide.app` — it will open immediately!
 
 ---
 
