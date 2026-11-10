@@ -18,7 +18,7 @@ public final class UpdateChecker: ObservableObject {
         if let ver = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, !ver.isEmpty {
             return ver
         }
-        return "1.0.0"
+        return "1.0.1"
     }
 
     /// Checks for updates against GitHub Releases.
@@ -205,3 +205,4 @@ public final class UpdateChecker: ObservableObject {
         }
     }
 }
+
