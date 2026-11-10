@@ -108,117 +108,79 @@ public struct MenuBarPopupView: View {
             .padding(.top, 14)
             .padding(.bottom, 12)
 
-            // Top Status Card
-            HStack(spacing: 0) {
-                // Brightness Side
-                HStack(spacing: 8) {
-                    // Left vertical indicator bar
-                    GeometryReader { geo in
-                        ZStack(alignment: .bottom) {
-                            Capsule()
-                                .fill(Color.primary.opacity(0.08))
-                                .frame(width: 4)
-                            Capsule()
-                                .fill(Color(red: 0.95, green: 0.58, blue: 0.15))
-                                .frame(width: 4, height: max(4, geo.size.height * CGFloat(max(0, min(1, brightnessVal)))))
-                        }
-                    }
-                    .frame(width: 4)
-
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 5) {
+            // Top Status Card (Horizontal Sliders)
+            VStack(spacing: 12) {
+                // Brightness Slider Row
+                VStack(spacing: 6) {
+                    HStack {
+                        HStack(spacing: 6) {
                             Image(systemName: "sun.max.fill")
-                                .font(.system(size: 11, weight: .bold))
+                                .font(.system(size: 12, weight: .bold))
                                 .foregroundColor(Color(red: 0.95, green: 0.58, blue: 0.15))
                             Text("BRIGHTNESS")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.secondary)
-                        }
-
-                        HStack(alignment: .firstTextBaseline, spacing: 1) {
-                            Text("\(Int(round(brightnessVal * 100)))")
-                                .font(.system(size: 34, weight: .semibold, design: .default))
-                            Text("%")
-                                .font(.system(size: 17, weight: .medium, design: .default))
-                                .foregroundColor(.secondary)
-                        }
-                    }
-                    Spacer()
-                }
-                .contentShape(Rectangle())
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { value in
-                            let delta = Float(-value.translation.height / 150.0)
-                            let newB = BrightnessController.shared.adjustBrightness(by: delta)
-                            brightnessVal = newB
-                        }
-                )
-
-                // Divider inside card
-                Rectangle()
-                    .fill(Color.primary.opacity(0.06))
-                    .frame(width: 1, height: 50)
-                    .padding(.horizontal, 6)
-
-                // Volume Side
-                HStack(spacing: 8) {
-                    VStack(alignment: .leading, spacing: 2) {
-                        HStack(spacing: 5) {
-                            Text("VOLUME")
-                                .font(.system(size: 10, weight: .bold))
-                                .foregroundColor(.secondary)
-                            Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
                                 .font(.system(size: 11, weight: .bold))
-                                .foregroundColor(Color(red: 0.2, green: 0.55, blue: 0.95))
-                        }
-
-                        HStack(alignment: .firstTextBaseline, spacing: 1) {
-                            Text("\(Int(round(volumeVal * 100)))")
-                                .font(.system(size: 34, weight: .semibold, design: .default))
-                            Text("%")
-                                .font(.system(size: 17, weight: .medium, design: .default))
                                 .foregroundColor(.secondary)
                         }
+                        Spacer()
+                        Text("\(Int(round(brightnessVal * 100)))%")
+                            .font(.system(size: 12, weight: .bold, design: .monospaced))
+                            .foregroundColor(.primary)
                     }
 
-                    Spacer()
-
-                    // Right vertical indicator bar
-                    GeometryReader { geo in
-                        ZStack(alignment: .bottom) {
-                            Capsule()
-                                .fill(Color.primary.opacity(0.08))
-                                .frame(width: 4)
-                            Capsule()
-                                .fill(Color(red: 0.2, green: 0.55, blue: 0.95))
-                                .frame(width: 4, height: max(4, geo.size.height * CGFloat(max(0, min(1, volumeVal)))))
-                        }
-                    }
-                    .frame(width: 4)
+                    HorizontalControlSlider(
+                        value: Binding(
+                            get: { Double(brightnessVal) },
+                            set: { newValue in
+                                let fVal = Float(newValue)
+                                brightnessVal = BrightnessController.shared.setBrightness(fVal)
+                            }
+                        ),
+                        accentColor: Color(red: 0.95, green: 0.58, blue: 0.15)
+                    )
                 }
-                .contentShape(Rectangle())
-                .gesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { value in
-                            let delta = Float(-value.translation.height / 150.0)
-                            let newV = VolumeController.shared.adjustVolume(by: delta)
-                            volumeVal = newV
+
+                // Volume Slider Row
+                VStack(spacing: 6) {
+                    HStack {
+                        HStack(spacing: 6) {
+                            Image(systemName: isMuted ? "speaker.slash.fill" : "speaker.wave.2.fill")
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundColor(Color(red: 0.2, green: 0.55, blue: 0.95))
+                            Text(isMuted ? "MUTED" : "VOLUME")
+                                .font(.system(size: 11, weight: .bold))
+                                .foregroundColor(.secondary)
                         }
-                )
+                        Spacer()
+                        Text("\(Int(round(volumeVal * 100)))%")
+                            .font(.system(size: 12, weight: .bold, design: .monospaced))
+                            .foregroundColor(.primary)
+                    }
+
+                    HorizontalControlSlider(
+                        value: Binding(
+                            get: { Double(volumeVal) },
+                            set: { newValue in
+                                let fVal = Float(newValue)
+                                volumeVal = VolumeController.shared.setVolume(fVal)
+                                isMuted = VolumeController.shared.isMuted()
+                            }
+                        ),
+                        accentColor: Color(red: 0.2, green: 0.55, blue: 0.95)
+                    )
+                }
             }
             .padding(.horizontal, 14)
-            .padding(.vertical, 14)
+            .padding(.vertical, 12)
             .background(
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(Color.primary.opacity(0.04))
                     .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .stroke(Color.primary.opacity(0.08), lineWidth: 1)
                     )
             )
             .padding(.horizontal, 16)
-            .padding(.bottom, 12)
+            .padding(.bottom, 10)
 
             // Feature Rows & Sliders
             ScrollView(.vertical, showsIndicators: false) {
@@ -504,6 +466,49 @@ struct CustomStepSlider: View {
             )
         }
         .frame(height: 18)
+    }
+}
+
+/// Interactive horizontal slider for direct brightness and volume dragging.
+struct HorizontalControlSlider: View {
+    @Binding var value: Double // 0.0 ... 1.0
+    let accentColor: Color
+
+    var body: some View {
+        GeometryReader { geo in
+            let width = geo.size.width
+            let clampedVal = max(0.0, min(1.0, value))
+            let thumbX = CGFloat(clampedVal) * (width - 16) + 8
+
+            ZStack(alignment: .leading) {
+                // Background track
+                Capsule()
+                    .fill(Color.primary.opacity(0.08))
+                    .frame(height: 16)
+
+                // Active filled track
+                Capsule()
+                    .fill(accentColor)
+                    .frame(width: max(16, thumbX + 8), height: 16)
+
+                // White circular thumb knob
+                Circle()
+                    .fill(Color.white)
+                    .frame(width: 14, height: 14)
+                    .shadow(color: .black.opacity(0.25), radius: 2, x: 0, y: 1)
+                    .position(x: thumbX, y: 8)
+            }
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { gesture in
+                        let clampedX = max(0, min(width, gesture.location.x))
+                        let percent = Double(clampedX / width)
+                        value = max(0.0, min(1.0, percent))
+                    }
+            )
+        }
+        .frame(height: 16)
     }
 }
 
