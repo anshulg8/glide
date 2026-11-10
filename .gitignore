@@ -3,4 +3,5 @@
 .swiftpm/
 *.xcodeproj
 Glide.app
-
+*.zip
+*.dmg

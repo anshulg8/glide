@@ -81,4 +81,12 @@ echo "==> Ad-hoc code signing..."
 codesign --force --deep --sign - "${APP_DIR}"
 
 echo "==> Successfully bundled: ${APP_DIR}"
+
+if [ "${CONFIG}" = "release" ]; then
+  echo "==> Creating distributable ${ROOT}/${APP_NAME}.zip..."
+  rm -f "${ROOT}/${APP_NAME}.zip"
+  ditto -c -k --sequesterRsrc --keepParent "${APP_DIR}" "${ROOT}/${APP_NAME}.zip"
+  echo "==> Distributable package ready at: ${ROOT}/${APP_NAME}.zip"
+fi
+
 echo "To test run: open \"${APP_DIR}\""

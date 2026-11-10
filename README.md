@@ -1,7 +1,7 @@
 # Glide
 
 <p align="center">
-  <img src="Resources/AppIcon.icns" width="128" height="128" alt="Glide Icon">
+  <img src="Resources/AppIcon.png" width="128" height="128" alt="Glide Icon">
 </p>
 
 <p align="center">
@@ -11,6 +11,7 @@
 <p align="center">
   <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.9+-FA7343.svg?logo=swift&logoColor=white" alt="Swift 5.9+"></a>
   <a href="https://apple.com/macos"><img src="https://img.shields.io/badge/macOS-14.0+-000000.svg?logo=apple&logoColor=white" alt="macOS 14+"></a>
+  <img src="https://img.shields.io/badge/Permissions-Zero_Required-brightgreen.svg" alt="Zero Permissions">
   <img src="https://img.shields.io/badge/Dependencies-0-success.svg" alt="Zero Dependencies">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
 </p>
@@ -27,14 +28,70 @@ Created and maintained with ❤️ by **[Anshul Garg](http://anshulgarg.in/)**.
 
 ---
 
-## ✨ Features
+## 📥 Direct Download (No Xcode Required)
 
-- **Left Edge Slide**: Smoothly adjusts display brightness (0% to 100%) via Apple Silicon native `DisplayServices.framework`.
+You do **not** need to compile the app yourself to use Glide:
+
+1. Download the latest **[`Glide.zip`](https://github.com/anshulg8/glide/releases/latest)** from GitHub Releases.
+2. Unzip the file and drag **`Glide.app`** into your **Applications** folder.
+3. Launch `Glide.app` (see the [First Launch Note](#-first-launch-gatekeeper-notice) below).
+
+---
+
+## 🔒 Permissions: None Required!
+
+Unlike most trackpad or gesture utilities, **Glide requires ZERO system permissions**:
+- ❌ **No Accessibility Permissions** needed.
+- ❌ **No Input Monitoring** permissions needed.
+- ❌ **No Screen Recording** permissions needed.
+- ❌ **No Helper Daemons or Kernel Extensions** installed.
+
+Glide communicates directly with Apple's low-level Multitouch and Display frameworks in user space, operating completely sandboxed from your private keystrokes and data.
+
+---
+
+## 💻 Hardware & System Compatibility
+
+### Compatible Macs:
+- **MacBook Pro**: 2015 and later (Intel & all Apple Silicon M1, M2, M3, M4 models).
+- **MacBook Air**: 2018 and later (Intel & all Apple Silicon M1, M2, M3, M4 models).
+- **Desktop Macs**: Mac mini, Mac Studio, iMac, Mac Pro when paired with an external **Apple Magic Trackpad 2 or 3** (Bluetooth or USB).
+
+### Supported OS:
+- **macOS 14.0 (Sonoma)** or newer (including **macOS 15 Sequoia**).
+
+> **Note on Screen Brightness**: Display brightness control communicates directly with built-in laptop displays and Apple Studio Display / Pro Display XDR via Apple's native `DisplayServices.framework`. System volume control works across all audio output devices (built-in speakers, headphones, AirPods, HDMI, external DACs).
+
+---
+
+## 🛡️ First Launch (Gatekeeper Notice)
+
+Because Glide is a free, community open-source utility and is not notarized through a paid Apple Developer subscription ($99/yr), macOS Gatekeeper may show a warning on first launch:
+> *"Glide cannot be opened because Apple cannot check it for malicious software."*
+
+You only need to approve it once using either method:
+
+### Method 1: Right-Click (Easiest)
+1. Open your **Applications** folder in Finder.
+2. **Right-click** (or Control-click) `Glide.app` and choose **Open**.
+3. In the dialog that appears, click **Open**.
+
+### Method 2: Terminal One-Liner
+Open Terminal and remove the quarantine attribute:
+```bash
+xattr -cr /Applications/Glide.app
+```
+
+---
+
+## ✨ Features & Capabilities
+
+- **Left Edge Slide**: Smoothly adjusts display brightness (0% to 100%) via Apple's private `DisplayServices.framework`.
 - **Right Edge Slide**: Smoothly adjusts system output volume (0% to 100%) via CoreAudio.
 - **Hardware Taptic Engine Feedback (`MTActuator`)**:
   - Crisp Force Touch mechanical click when a gesture engages or toggles mute (Actuation ID 6).
   - Subtle ratchet micro-ticks every ~3.5% adjustment increment as you slide (Actuation ID 1).
-- **Rock-Solid Cursor Freeze**: The mouse pointer stays completely pinned and stationary during edge slides (`CGAssociateMouseAndMouseCursorPosition(0)` and per-frame `CGWarpMouseCursorPosition`), restoring seamlessly upon release.
+- **Rock-Solid Cursor Freeze**: The mouse pointer stays completely pinned and stationary during edge slides (`CGAssociateMouseAndMouseCursorPosition(0)` and per-frame `CGWarpMouseCursorPosition`), restoring seamlessly upon release without jumping.
 - **Interactive Horizontal Sliders**: The menu bar popup features space-saving horizontal Brightness and Volume tracks that you can tap or drag directly, with real-time bidirectional sync.
 - **Fine Control (`⇧ Shift` / `⌥ Option`)**: Holding Shift or Option scales adjustment speed down to `0.25×` for precision quarter-steps.
 - **Quick Mute Corner Tap**: Double-tapping the top-right corner of the trackpad toggles system mute with haptic feedback.
@@ -56,9 +113,10 @@ glide/
 ├── README.md
 ├── Resources/
 │   ├── AppIcon.icns           # High-resolution application icon
+│   ├── AppIcon.png            # 256x256 PNG for web & README
 │   └── Info.plist             # LSUIElement = true accessory configuration
 ├── scripts/
-│   ├── bundle.sh              # Build release SPM executable, assemble Glide.app, and ad-hoc sign
+│   ├── bundle.sh              # Build release SPM binary, package Glide.app & Glide.zip, sign
 │   └── generate_icon.swift    # App icon asset generator
 └── Sources/
     └── Glide/
@@ -78,11 +136,9 @@ glide/
 
 ---
 
-## 🚀 Building & Running
+## 🔨 Building from Source
 
-### Requirements
-- macOS 14.0 (Sonoma) or newer (Apple Silicon or Intel)
-- Swift 5.9+ / Xcode Command Line Tools
+If you prefer to compile Glide yourself:
 
 ### 1. Clone the Repository
 ```bash
@@ -94,7 +150,7 @@ cd glide
 ```bash
 ./scripts/bundle.sh release
 ```
-This produces an ad-hoc signed, stripped `Glide.app` in the project root.
+This produces both `Glide.app` and `Glide.zip` in the root folder.
 
 ### 3. Launch
 ```bash
