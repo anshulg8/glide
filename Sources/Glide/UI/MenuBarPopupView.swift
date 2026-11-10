@@ -40,7 +40,6 @@ public struct GlideTrackpadIcon: View {
 /// Main menu-bar dropdown view matching menubar-main.png.
 public struct MenuBarPopupView: View {
     @Bindable var config = GestureConfiguration.shared
-    @ObservedObject private var updateChecker = UpdateChecker.shared
 
     @State private var brightnessVal: Float = BrightnessController.shared.currentBrightness()
     @State private var volumeVal: Float = VolumeController.shared.currentVolume()
@@ -85,20 +84,6 @@ public struct MenuBarPopupView: View {
         }
     }
 
-    private var statusDotColor: Color {
-        if config.requireModifier {
-            return Color.orange
-        }
-        return Color.green
-    }
-
-    private var statusText: String {
-        if config.requireModifier {
-            return "⌥ Required"
-        }
-        return "Ready"
-    }
-
     private var mainContent: some View {
         VStack(spacing: 0) {
             // Header
@@ -108,52 +93,6 @@ public struct MenuBarPopupView: View {
                     .font(.system(size: 16, weight: .bold))
 
                 Spacer()
-
-                if let updateVer = updateChecker.availableUpdateVersion {
-                    Button(action: {
-                        AppDelegate.shared?.closePopover()
-                        updateChecker.checkForUpdates(explicit: true)
-                    }) {
-                        HStack(spacing: 5) {
-                            Circle()
-                                .fill(Color(red: 0.42, green: 0.33, blue: 0.96))
-                                .frame(width: 7, height: 7)
-                            Text("Update v\(updateVer)")
-                                .font(.system(size: 11, weight: .semibold))
-                                .foregroundColor(Color(red: 0.42, green: 0.33, blue: 0.96))
-                        }
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color(red: 0.42, green: 0.33, blue: 0.96).opacity(0.12))
-                        .clipShape(Capsule())
-                    }
-                    .buttonStyle(.plain)
-                    .help("Update \(updateVer) available! Click to download")
-                } else {
-                    // Status pill (reflects gesture readiness and modifier state)
-                    HStack(spacing: 5) {
-                        Circle()
-                            .fill(statusDotColor)
-                            .frame(width: 7, height: 7)
-                        Text(statusText)
-                            .font(.system(size: 12, weight: .medium))
-                            .foregroundColor(.secondary)
-                    }
-                }
-
-                // Quick refresh shortcut to check for updates
-                Button(action: {
-                    AppDelegate.shared?.closePopover()
-                    updateChecker.checkForUpdates(explicit: true)
-                }) {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.secondary)
-                        .frame(width: 22, height: 22)
-                        .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .help("Check for Updates")
             }
             .padding(.horizontal, 16)
             .padding(.top, 14)
