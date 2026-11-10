@@ -88,3 +88,4 @@ public struct AboutView: View {
         .frame(width: 300)
     }
 }
+
