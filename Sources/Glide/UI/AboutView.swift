@@ -12,10 +12,20 @@ public struct AboutView: View {
 
     public var body: some View {
         VStack(spacing: 16) {
-            // Icon
-            GlideTrackpadIcon(size: 68)
-                .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
-                .padding(.top, 6)
+            // Icon in soft accent container
+            ZStack {
+                RoundedRectangle(cornerRadius: 18, style: .continuous)
+                    .fill(Color.glideAccent.opacity(0.12))
+                    .frame(width: 76, height: 76)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 18, style: .continuous)
+                            .stroke(Color.glideAccent.opacity(0.25), lineWidth: 1)
+                    )
+
+                GlideTrackpadIcon(size: 50)
+            }
+            .shadow(color: Color.glideAccent.opacity(0.16), radius: 8, x: 0, y: 3)
+            .padding(.top, 4)
 
             // Title & Version
             VStack(spacing: 4) {
@@ -74,13 +84,17 @@ public struct AboutView: View {
                         NSWorkspace.shared.open(url)
                     }
                 }) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 5) {
                         Image(systemName: "globe")
                             .font(.system(size: 11))
                         Text("anshulgarg.in")
                             .font(.system(size: 12, weight: .medium))
                     }
                     .foregroundColor(Color.glideAccent)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Color.glideAccent.opacity(0.12))
+                    .cornerRadius(12)
                 }
                 .buttonStyle(.plain)
                 .onHover { inside in
@@ -111,13 +125,25 @@ public struct AboutView: View {
             // Close button
             Button(action: onClose) {
                 Text("Close")
-                    .font(.system(size: 13, weight: .medium))
-                    .frame(minWidth: 80)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(.white)
+                    .frame(width: 88, height: 28)
+                    .background(Color.glideAccent)
+                    .cornerRadius(7)
             }
+            .buttonStyle(.plain)
             .keyboardShortcut(.defaultAction)
+            .onHover { inside in
+                if inside {
+                    NSCursor.pointingHand.push()
+                } else {
+                    NSCursor.pop()
+                }
+            }
             .padding(.top, 4)
             .padding(.bottom, 6)
         }
+        .tint(Color.glideAccent)
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
         .frame(width: 340)
