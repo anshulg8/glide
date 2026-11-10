@@ -38,7 +38,6 @@ public struct SettingsView: View {
                         // Swap Sides
                         SettingsRow(
                             icon: "arrow.left.arrow.right",
-                            iconColor: .secondary,
                             title: "Swap Sides",
                             subtitle: config.isSwapSides ? "Left: Volume · Right: Brightness" : "Left: Brightness · Right: Volume"
                         ) {
@@ -50,7 +49,6 @@ public struct SettingsView: View {
                         // Active Trackpad Height Picker
                         SettingsRow(
                             icon: "rectangle.bottomhalf.filled",
-                            iconColor: .secondary,
                             title: "Trackpad Height",
                             subtitle: heightModeDescription
                         ) {
@@ -67,7 +65,6 @@ public struct SettingsView: View {
                         // Require Fn or Option
                         SettingsRow(
                             icon: "option",
-                            iconColor: .secondary,
                             title: "Require Fn or ⌥",
                             subtitle: "Only slide while holding a modifier"
                         ) {
@@ -90,8 +87,6 @@ public struct SettingsView: View {
                         // Freeze Cursor
                         SettingsRow(
                             icon: "location.north.fill",
-                            iconBg: Color(red: 0.42, green: 0.33, blue: 0.96),
-                            iconColor: .white,
                             title: "Freeze Cursor",
                             subtitle: "Pointer stays put while sliding"
                         ) {
@@ -103,8 +98,6 @@ public struct SettingsView: View {
                         // Fine Control
                         SettingsRow(
                             icon: "dial.low.fill",
-                            iconBg: Color(red: 0.42, green: 0.33, blue: 0.96),
-                            iconColor: .white,
                             title: "Fine Control",
                             subtitle: "Hold ⇧ ⌥ for quarter steps"
                         ) {
@@ -116,8 +109,6 @@ public struct SettingsView: View {
                         // Visual Overlay HUD
                         SettingsRow(
                             icon: "macwindow.on.rectangle",
-                            iconBg: Color(red: 0.42, green: 0.33, blue: 0.96),
-                            iconColor: .white,
                             title: "Visual Overlay HUD",
                             subtitle: "Floating bezel indicator on screen"
                         ) {
@@ -141,9 +132,9 @@ public struct SettingsView: View {
                         HStack(spacing: 10) {
                             Image(systemName: "circle.lefthalf.filled")
                                 .font(.system(size: 13, weight: .semibold))
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.white)
                                 .frame(width: 28, height: 28)
-                                .background(Color.primary.opacity(0.06))
+                                .background(Color(red: 0.42, green: 0.33, blue: 0.96))
                                 .clipShape(Circle())
 
                             Text("Appearance")
@@ -165,8 +156,6 @@ public struct SettingsView: View {
                         // Open at Login
                         SettingsRow(
                             icon: "power",
-                            iconBg: Color(red: 0.42, green: 0.33, blue: 0.96),
-                            iconColor: .white,
                             title: "Open at Login",
                             subtitle: ""
                         ) {
@@ -259,8 +248,8 @@ public struct SettingsView: View {
 
 private struct SettingsRow<Trailing: View>: View {
     var icon: String
-    var iconBg: Color? = nil
-    var iconColor: Color = .primary
+    var iconBg: Color = Color(red: 0.42, green: 0.33, blue: 0.96)
+    var iconColor: Color = .white
     var title: String
     var subtitle: String
     @ViewBuilder var trailing: Trailing
@@ -271,7 +260,7 @@ private struct SettingsRow<Trailing: View>: View {
                 .font(.system(size: 13, weight: .semibold))
                 .foregroundColor(iconColor)
                 .frame(width: 28, height: 28)
-                .background(iconBg ?? Color.primary.opacity(0.06))
+                .background(iconBg)
                 .clipShape(Circle())
 
             VStack(alignment: .leading, spacing: 2) {
