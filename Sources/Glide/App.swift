@@ -2,6 +2,7 @@ import SwiftUI
 import AppKit
 
 @main
+@MainActor
 final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     public static private(set) var shared: AppDelegate?
 
@@ -37,6 +38,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
         // Start trackpad gesture manager
         TrackpadGestureManager.shared.start()
+
+        // Check for updates in background after startup (silent unless update is found)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+            UpdateChecker.shared.checkForUpdates(explicit: false)
+        }
 
         NSLog("[Glide] Application initialized.")
     }
@@ -177,12 +183,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private func showContextMenu(button: NSStatusBarButton) {
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "Settings…", action: #selector(openSettingsWindow), keyEquivalent: ","))
+        menu.addItem(NSMenuItem(title: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "About Glide…", action: #selector(openAboutWindow), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit Glide", action: #selector(quitApp), keyEquivalent: "q"))
         statusItem?.menu = menu
         button.performClick(nil)
         statusItem?.menu = nil
+    }
+
+    @objc func checkForUpdates() {
+        closePopover()
+        UpdateChecker.shared.checkForUpdates(explicit: true)
     }
 
     @objc func openSettingsWindow() {

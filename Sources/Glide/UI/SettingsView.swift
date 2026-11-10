@@ -201,13 +201,16 @@ public struct SettingsView: View {
 
                 Spacer()
 
-                Text("Version 1.0")
+                Text("Version \(UpdateChecker.shared.currentVersion)")
                     .font(.system(size: 11))
                     .foregroundColor(.secondary)
 
                 Spacer()
 
                 Menu {
+                    Button("Check for Updates…") {
+                        UpdateChecker.shared.checkForUpdates(explicit: true)
+                    }
                     Button("Reset to Defaults") {
                         config.resetToDefaults()
                     }

@@ -4,6 +4,7 @@ import AppKit
 /// Dedicated About window for Glide.
 public struct AboutView: View {
     var onClose: () -> Void
+    @ObservedObject private var updateChecker = UpdateChecker.shared
 
     public init(onClose: @escaping () -> Void) {
         self.onClose = onClose
@@ -17,12 +18,45 @@ public struct AboutView: View {
                 .padding(.top, 6)
 
             // Title & Version
-            VStack(spacing: 3) {
+            VStack(spacing: 4) {
                 Text("Glide")
                     .font(.system(size: 22, weight: .bold))
-                Text("Version 1.0")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(.secondary)
+
+                HStack(spacing: 8) {
+                    Text("Version \(updateChecker.currentVersion)")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.secondary)
+
+                    Text("•")
+                        .foregroundColor(.secondary.opacity(0.5))
+
+                    Button(action: {
+                        updateChecker.checkForUpdates(explicit: true)
+                    }) {
+                        HStack(spacing: 3) {
+                            if updateChecker.isChecking {
+                                ProgressView()
+                                    .scaleEffect(0.6)
+                                    .frame(width: 10, height: 10)
+                            } else {
+                                Image(systemName: "arrow.triangle.2.circlepath")
+                                    .font(.system(size: 10, weight: .semibold))
+                            }
+                            Text("Check for Updates")
+                                .font(.system(size: 11, weight: .medium))
+                        }
+                        .foregroundColor(Color(red: 0.42, green: 0.33, blue: 0.96))
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(updateChecker.isChecking)
+                    .onHover { inside in
+                        if inside {
+                            NSCursor.pointingHand.push()
+                        } else {
+                            NSCursor.pop()
+                        }
+                    }
+                }
             }
 
             // Creator attribution

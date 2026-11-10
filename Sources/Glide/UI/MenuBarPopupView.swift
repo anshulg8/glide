@@ -374,6 +374,10 @@ public struct MenuBarPopupView: View {
                 Spacer()
 
                 Menu {
+                    Button("Check for Updates…") {
+                        AppDelegate.shared?.closePopover()
+                        UpdateChecker.shared.checkForUpdates(explicit: true)
+                    }
                     Button("Reset to Defaults") {
                         config.resetToDefaults()
                     }
