@@ -99,7 +99,7 @@ public struct MenuBarPopupView: View {
             .padding(.bottom, 12)
 
             // Top Status Card (Horizontal Sliders)
-            VStack(spacing: 12) {
+            VStack(spacing: 14) {
                 // Brightness Slider Row
                 VStack(spacing: 6) {
                     HStack {
@@ -160,7 +160,7 @@ public struct MenuBarPopupView: View {
                 }
             }
             .padding(.horizontal, 14)
-            .padding(.vertical, 12)
+            .padding(.vertical, 14)
             .background(
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(Color.primary.opacity(0.04))
@@ -170,11 +170,11 @@ public struct MenuBarPopupView: View {
                     )
             )
             .padding(.horizontal, 16)
-            .padding(.bottom, 10)
+            .padding(.bottom, 12)
 
             // Feature Rows & Sliders
             ScrollView(.vertical, showsIndicators: false) {
-                VStack(spacing: 12) {
+                VStack(spacing: 15) {
                     // Haptic Feedback Row
                     HStack(spacing: 10) {
                         Image(systemName: "hand.tap.fill")
@@ -277,10 +277,10 @@ public struct MenuBarPopupView: View {
                     }
 
                     Divider()
-                        .padding(.vertical, 2)
+                        .padding(.vertical, 4)
 
                     // Sensitivity Slider
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 10) {
                             Image(systemName: "gauge.with.needle")
                                 .font(.system(size: 13, weight: .semibold))
@@ -314,7 +314,7 @@ public struct MenuBarPopupView: View {
                     }
 
                     // Edge Width Slider
-                    VStack(alignment: .leading, spacing: 6) {
+                    VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 10) {
                             Image(systemName: "arrow.left.and.right")
                                 .font(.system(size: 13, weight: .semibold))
@@ -342,11 +342,11 @@ public struct MenuBarPopupView: View {
                     }
                 }
                 .padding(.horizontal, 16)
-                .padding(.vertical, 4)
+                .padding(.vertical, 6)
             }
 
             Divider()
-                .padding(.top, 8)
+                .padding(.top, 4)
 
             // Footer
             HStack {
