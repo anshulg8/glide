@@ -201,6 +201,7 @@ public struct SettingsView: View {
                     .foregroundColor(.primary)
                 }
                 .buttonStyle(.plain)
+                .keyboardShortcut(",", modifiers: .command)
 
                 Spacer()
 

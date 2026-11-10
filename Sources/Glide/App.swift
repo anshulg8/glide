@@ -134,6 +134,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private func openPopover(button: NSStatusBarButton) {
         guard let p = popover else { return }
+        // Always reset to main tab when opening
+        NotificationCenter.default.post(name: Notification.Name("GlideResetToMain"), object: nil)
         p.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         p.contentViewController?.view.window?.makeKey()
         installEventMonitors()
@@ -144,6 +146,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         guard let p = popover else { return }
         p.close()
         removeEventMonitors()
+        NotificationCenter.default.post(name: Notification.Name("GlideResetToMain"), object: nil)
     }
 
     // MARK: - NSPopoverDelegate
@@ -151,6 +154,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     func popoverDidClose(_ notification: Notification) {
         lastCloseTime = ProcessInfo.processInfo.systemUptime
         removeEventMonitors()
+        NotificationCenter.default.post(name: Notification.Name("GlideResetToMain"), object: nil)
     }
 
     // MARK: - Outside Click & Key Dismiss Monitors
@@ -184,9 +188,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             }
         }
 
-        // Local monitor: dismisses popover on Escape key
+        // Local monitor: dismisses popover on Escape key, handles ⌘, for Settings
         localKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self, let p = self.popover, p.isShown else { return event }
+
+            // ⌘, shortcut to open Settings
+            if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "," {
+                NotificationCenter.default.post(name: Notification.Name("GlideShowSettings"), object: nil)
+                return nil
+            }
+
             if event.keyCode == 53 { // Escape
                 DispatchQueue.main.async {
                     self.closePopover()

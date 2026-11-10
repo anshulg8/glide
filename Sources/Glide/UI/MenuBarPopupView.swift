@@ -69,9 +69,22 @@ public struct MenuBarPopupView: View {
             isMuted = VolumeController.shared.isMuted()
         }
         .onAppear {
+            showSettings = false
             brightnessVal = BrightnessController.shared.currentBrightness()
             volumeVal = VolumeController.shared.currentVolume()
             isMuted = VolumeController.shared.isMuted()
+        }
+        .onDisappear {
+            showSettings = false
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("GlideResetToMain"))) { _ in
+            showSettings = false
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("GlideShowSettings"))) { _ in
+            showSettings = true
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSPopover.didCloseNotification)) { _ in
+            showSettings = false
         }
         .frame(width: 320, height: 580)
     }
@@ -360,6 +373,7 @@ public struct MenuBarPopupView: View {
                     .foregroundColor(.primary)
                 }
                 .buttonStyle(.plain)
+                .keyboardShortcut(",", modifiers: .command)
 
                 Spacer()
 
