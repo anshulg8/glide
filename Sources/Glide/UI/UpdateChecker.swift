@@ -7,6 +7,7 @@ public final class UpdateChecker: ObservableObject {
     public static let shared = UpdateChecker()
 
     @Published public private(set) var isChecking: Bool = false
+    @Published public private(set) var availableUpdateVersion: String? = nil
 
     private let repoOwner = "anshulg8"
     private let repoName = "glide"
@@ -35,14 +36,18 @@ public final class UpdateChecker: ObservableObject {
                 let localVersion = cleanVersion(self.currentVersion)
 
                 if isVersion(remoteVersion, newerThan: localVersion) {
+                    self.availableUpdateVersion = remoteVersion
                     showUpdateAvailableAlert(
                         newVersion: remoteVersion,
                         releaseName: release.name ?? "Glide \(remoteVersion)",
                         releaseUrl: release.htmlUrl,
                         downloadUrl: release.zipAssetUrl
                     )
-                } else if explicit {
-                    showUpToDateAlert(version: localVersion)
+                } else {
+                    self.availableUpdateVersion = nil
+                    if explicit {
+                        showUpToDateAlert(version: localVersion)
+                    }
                 }
             } catch {
                 if explicit {
