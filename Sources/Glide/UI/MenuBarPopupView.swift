@@ -45,6 +45,7 @@ public struct MenuBarPopupView: View {
     @State private var volumeVal: Float = VolumeController.shared.currentVolume()
     @State private var isMuted: Bool = VolumeController.shared.isMuted()
     @State private var showSettings: Bool = false
+    @State private var showQuitConfirmation: Bool = false
 
     private let timer = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect()
 
@@ -425,7 +426,7 @@ public struct MenuBarPopupView: View {
                 .menuStyle(.borderlessButton)
                 .fixedSize()
 
-                Button(action: { NSApp.terminate(nil) }) {
+                Button(action: { showQuitConfirmation = true }) {
                     Image(systemName: "power")
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
@@ -437,6 +438,14 @@ public struct MenuBarPopupView: View {
             .padding(.vertical, 12)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .alert("Quit Glide?", isPresented: $showQuitConfirmation) {
+            Button("Quit Glide", role: .destructive) {
+                NSApp.terminate(nil)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Trackpad edge gestures will stop working until you relaunch Glide.")
+        }
     }
 }
 

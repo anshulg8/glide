@@ -6,6 +6,7 @@ public struct SettingsView: View {
     @Bindable var config = GestureConfiguration.shared
     var onBack: () -> Void
     var onQuit: () -> Void
+    @State private var showQuitConfirmation: Bool = false
 
     public init(onBack: @escaping () -> Void, onQuit: @escaping () -> Void) {
         self.onBack = onBack
@@ -221,7 +222,7 @@ public struct SettingsView: View {
                 .menuStyle(.borderlessButton)
                 .fixedSize()
 
-                Button(action: onQuit) {
+                Button(action: { showQuitConfirmation = true }) {
                     Image(systemName: "power")
                         .font(.system(size: 14))
                         .foregroundColor(.secondary)
@@ -233,6 +234,14 @@ public struct SettingsView: View {
             .padding(.vertical, 12)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .alert("Quit Glide?", isPresented: $showQuitConfirmation) {
+            Button("Quit Glide", role: .destructive) {
+                onQuit()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Trackpad edge gestures will stop working until you relaunch Glide.")
+        }
     }
 
     private var heightModeDescription: String {
