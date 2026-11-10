@@ -1,7 +1,7 @@
 import SwiftUI
 import ServiceManagement
 
-/// Settings view matching menubar-settings.png.
+/// Settings view matching menubar-settings.png with first-class controls for Trackpad Height and Visual Overlay HUD.
 public struct SettingsView: View {
     @Bindable var config = GestureConfiguration.shared
     var onBack: () -> Void
@@ -46,24 +46,21 @@ public struct SettingsView: View {
                                 .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
                         }
 
-                        // Bottom Quarter Only
+                        // Active Trackpad Height Picker
                         SettingsRow(
                             icon: "rectangle.bottomhalf.filled",
                             iconColor: .secondary,
-                            title: "Bottom Quarter Only",
-                            subtitle: "Ignore touches above the lower 25%"
+                            title: "Trackpad Height",
+                            subtitle: heightModeDescription
                         ) {
-                            Toggle("", isOn: Binding(
-                                get: { config.edgeZoneHeightMode == 2 },
-                                set: { config.edgeZoneHeightMode = $0 ? 2 : 0 }
-                            ))
+                            Picker("", selection: $config.edgeZoneHeightMode) {
+                                Text("Entire Edge").tag(0)
+                                Text("Bottom Half").tag(1)
+                                Text("Bottom Quarter").tag(2)
+                            }
                             .labelsHidden()
-                            .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
-                        }
-                        .contextMenu {
-                            Button("Entire Edge (100%)") { config.edgeZoneHeightMode = 0 }
-                            Button("Bottom Half (50%)") { config.edgeZoneHeightMode = 1 }
-                            Button("Bottom Quarter (25%)") { config.edgeZoneHeightMode = 2 }
+                            .pickerStyle(.menu)
+                            .frame(width: 125)
                         }
 
                         // Require Fn or Option
@@ -111,6 +108,19 @@ public struct SettingsView: View {
                             subtitle: "Hold ⇧ ⌥ for quarter steps"
                         ) {
                             Toggle("", isOn: $config.isFineControlEnabled)
+                                .labelsHidden()
+                                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                        }
+
+                        // Visual Overlay HUD
+                        SettingsRow(
+                            icon: "macwindow.on.rectangle",
+                            iconBg: Color(red: 0.42, green: 0.33, blue: 0.96),
+                            iconColor: .white,
+                            title: "Visual Overlay HUD",
+                            subtitle: "Floating bezel indicator on screen"
+                        ) {
+                            Toggle("", isOn: $config.showOverlay)
                                 .labelsHidden()
                                 .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
                         }
@@ -197,13 +207,6 @@ public struct SettingsView: View {
                 Spacer()
 
                 Menu {
-                    Menu("Active Trackpad Height") {
-                        Button("Entire Edge (Full)") { config.edgeZoneHeightMode = 0 }
-                        Button("Bottom Half (50%)") { config.edgeZoneHeightMode = 1 }
-                        Button("Bottom Quarter (25%)") { config.edgeZoneHeightMode = 2 }
-                    }
-                    Toggle("Visual Overlay HUD", isOn: $config.showOverlay)
-                    Divider()
                     Button("Reset to Defaults") {
                         config.resetToDefaults()
                     }
@@ -230,6 +233,15 @@ public struct SettingsView: View {
             .padding(.vertical, 12)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var heightModeDescription: String {
+        switch config.edgeZoneHeightMode {
+        case 0: return "Full edge (100%)"
+        case 1: return "Lower 50% only"
+        case 2: return "Lower 25% only"
+        default: return "Full edge"
+        }
     }
 }
 
