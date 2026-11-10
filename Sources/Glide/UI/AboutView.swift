@@ -62,15 +62,16 @@ public struct AboutView: View {
             Divider()
 
             // Feature Highlights
-            VStack(spacing: 4) {
+            VStack(spacing: 5) {
                 Text("MacBook Trackpad Edge Gestures")
                     .font(.system(size: 11, weight: .semibold))
                     .foregroundColor(.primary)
 
-                Text("Display Brightness • System Volume • Force Touch Haptics")
-                    .font(.system(size: 10))
+                Text("Display Brightness  •  System Volume  •  Force Touch Haptics")
+                    .font(.system(size: 11))
                     .foregroundColor(.secondary)
                     .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             // Close button
@@ -83,9 +84,9 @@ public struct AboutView: View {
             .padding(.top, 4)
             .padding(.bottom, 6)
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, 20)
         .padding(.vertical, 16)
-        .frame(width: 300)
+        .frame(width: 340)
     }
 }
 

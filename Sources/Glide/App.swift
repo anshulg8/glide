@@ -209,7 +209,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         closePopover()
         if aboutWindow == nil {
             let win = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 300, height: 280),
+                contentRect: NSRect(x: 0, y: 0, width: 340, height: 300),
                 styleMask: [.titled, .closable],
                 backing: .buffered,
                 defer: false
