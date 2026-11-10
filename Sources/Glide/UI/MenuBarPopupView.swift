@@ -80,6 +80,9 @@ public struct MenuBarPopupView: View {
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("GlideResetToMain"))) { _ in
             showSettings = false
         }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("GlideToggleSettings"))) { _ in
+            showSettings.toggle()
+        }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("GlideShowSettings"))) { _ in
             showSettings = true
         }
@@ -364,11 +367,19 @@ public struct MenuBarPopupView: View {
             // Footer
             HStack {
                 Button(action: { showSettings = true }) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 5) {
                         Image(systemName: "gearshape")
                             .font(.system(size: 13))
                         Text("Settings")
                             .font(.system(size: 13, weight: .medium))
+
+                        Text("⌘,")
+                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1.5)
+                            .background(Color.primary.opacity(0.06))
+                            .clipShape(RoundedRectangle(cornerRadius: 3.5, style: .continuous))
                     }
                     .foregroundColor(.primary)
                 }

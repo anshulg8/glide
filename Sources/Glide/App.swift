@@ -192,9 +192,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         localKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self, let p = self.popover, p.isShown else { return event }
 
-            // ⌘, shortcut to open Settings
+            // ⌘, shortcut to toggle Settings
             if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "," {
-                NotificationCenter.default.post(name: Notification.Name("GlideShowSettings"), object: nil)
+                NotificationCenter.default.post(name: Notification.Name("GlideToggleSettings"), object: nil)
                 return nil
             }
 
