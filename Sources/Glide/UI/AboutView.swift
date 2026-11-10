@@ -45,7 +45,7 @@ public struct AboutView: View {
                             Text("Check for Updates")
                                 .font(.system(size: 11, weight: .medium))
                         }
-                        .foregroundColor(Color(red: 0.42, green: 0.33, blue: 0.96))
+                        .foregroundColor(Color.glideAccent)
                     }
                     .buttonStyle(.plain)
                     .disabled(updateChecker.isChecking)
@@ -80,7 +80,7 @@ public struct AboutView: View {
                         Text("anshulgarg.in")
                             .font(.system(size: 12, weight: .medium))
                     }
-                    .foregroundColor(Color(red: 0.42, green: 0.33, blue: 0.96))
+                    .foregroundColor(Color.glideAccent)
                 }
                 .buttonStyle(.plain)
                 .onHover { inside in

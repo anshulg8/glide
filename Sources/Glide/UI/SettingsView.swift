@@ -44,7 +44,7 @@ public struct SettingsView: View {
                         ) {
                             Toggle("", isOn: $config.isSwapSides)
                                 .labelsHidden()
-                                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                                .toggleStyle(SwitchToggleStyle(tint: Color.glideAccent))
                         }
 
                         // Active Trackpad Height Picker
@@ -71,7 +71,7 @@ public struct SettingsView: View {
                         ) {
                             Toggle("", isOn: $config.requireModifier)
                                 .labelsHidden()
-                                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                                .toggleStyle(SwitchToggleStyle(tint: Color.glideAccent))
                         }
                     }
                 }
@@ -93,7 +93,7 @@ public struct SettingsView: View {
                         ) {
                             Toggle("", isOn: $config.isCursorFreezeEnabled)
                                 .labelsHidden()
-                                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                                .toggleStyle(SwitchToggleStyle(tint: Color.glideAccent))
                         }
 
                         // Fine Control
@@ -104,7 +104,7 @@ public struct SettingsView: View {
                         ) {
                             Toggle("", isOn: $config.isFineControlEnabled)
                                 .labelsHidden()
-                                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                                .toggleStyle(SwitchToggleStyle(tint: Color.glideAccent))
                         }
 
                         // Visual Overlay HUD
@@ -115,7 +115,7 @@ public struct SettingsView: View {
                         ) {
                             Toggle("", isOn: $config.showOverlay)
                                 .labelsHidden()
-                                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                                .toggleStyle(SwitchToggleStyle(tint: Color.glideAccent))
                         }
                     }
                 }
@@ -135,7 +135,7 @@ public struct SettingsView: View {
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundColor(.white)
                                 .frame(width: 28, height: 28)
-                                .background(Color(red: 0.42, green: 0.33, blue: 0.96))
+                                .background(Color.glideAccent)
                                 .clipShape(Circle())
 
                             Text("Appearance")
@@ -165,7 +165,7 @@ public struct SettingsView: View {
                                 set: { config.launchAtLogin = $0 }
                             ))
                             .labelsHidden()
-                            .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                            .toggleStyle(SwitchToggleStyle(tint: Color.glideAccent))
                         }
 
                         // Automatically Check for Updates
@@ -176,7 +176,7 @@ public struct SettingsView: View {
                         ) {
                             Toggle("", isOn: $config.autoCheckUpdates)
                                 .labelsHidden()
-                                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                                .toggleStyle(SwitchToggleStyle(tint: Color.glideAccent))
                         }
                     }
                 }
@@ -271,7 +271,7 @@ public struct SettingsView: View {
 
 private struct SettingsRow<Trailing: View>: View {
     var icon: String
-    var iconBg: Color = Color(red: 0.42, green: 0.33, blue: 0.96)
+    var iconBg: Color = Color.glideAccent
     var iconColor: Color = .white
     var title: String
     var subtitle: String

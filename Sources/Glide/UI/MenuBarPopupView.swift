@@ -197,7 +197,7 @@ public struct MenuBarPopupView: View {
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.white)
                             .frame(width: 28, height: 28)
-                            .background(Color(red: 0.42, green: 0.33, blue: 0.96))
+                            .background(Color.glideAccent)
                             .clipShape(Circle())
 
                         VStack(alignment: .leading, spacing: 2) {
@@ -226,7 +226,7 @@ public struct MenuBarPopupView: View {
                             .font(.system(size: 13, weight: .semibold))
                             .foregroundColor(.white)
                             .frame(width: 28, height: 28)
-                            .background(Color(red: 0.42, green: 0.33, blue: 0.96))
+                            .background(Color.glideAccent)
                             .clipShape(Circle())
 
                         VStack(alignment: .leading, spacing: 2) {
@@ -241,7 +241,7 @@ public struct MenuBarPopupView: View {
 
                         Toggle("", isOn: $config.isQuickMuteEnabled)
                             .labelsHidden()
-                            .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                            .toggleStyle(SwitchToggleStyle(tint: Color.glideAccent))
                     }
 
                     // Brightness Toggle
@@ -265,7 +265,7 @@ public struct MenuBarPopupView: View {
 
                         Toggle("", isOn: $config.isBrightnessEnabled)
                             .labelsHidden()
-                            .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                            .toggleStyle(SwitchToggleStyle(tint: Color.glideAccent))
                     }
 
                     // Volume Toggle
@@ -289,7 +289,7 @@ public struct MenuBarPopupView: View {
 
                         Toggle("", isOn: $config.isVolumeEnabled)
                             .labelsHidden()
-                            .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                            .toggleStyle(SwitchToggleStyle(tint: Color.glideAccent))
                     }
 
                     Divider()
@@ -302,7 +302,7 @@ public struct MenuBarPopupView: View {
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundColor(.white)
                                 .frame(width: 28, height: 28)
-                                .background(Color(red: 0.42, green: 0.33, blue: 0.96))
+                                .background(Color.glideAccent)
                                 .clipShape(Circle())
 
                             Text("Sensitivity")
@@ -336,7 +336,7 @@ public struct MenuBarPopupView: View {
                                 .font(.system(size: 13, weight: .semibold))
                                 .foregroundColor(.white)
                                 .frame(width: 28, height: 28)
-                                .background(Color(red: 0.42, green: 0.33, blue: 0.96))
+                                .background(Color.glideAccent)
                                 .clipShape(Circle())
 
                             Text("Edge Width")
@@ -463,7 +463,7 @@ struct CustomStepSlider: View {
 
                 // Active purple fill
                 Capsule()
-                    .fill(Color(red: 0.42, green: 0.33, blue: 0.96))
+                    .fill(Color.glideAccent)
                     .frame(width: thumbX + 6, height: 18)
 
                 // White circular thumb knob
