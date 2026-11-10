@@ -73,7 +73,7 @@ public struct MenuBarPopupView: View {
             volumeVal = VolumeController.shared.currentVolume()
             isMuted = VolumeController.shared.isMuted()
         }
-        .frame(width: 320, height: 530)
+        .frame(width: 320, height: 580)
     }
 
     private var colorScheme: ColorScheme? {

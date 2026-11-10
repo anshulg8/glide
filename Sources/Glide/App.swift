@@ -104,7 +104,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private func setupPopover() {
         let p = NSPopover()
-        p.contentSize = NSSize(width: 320, height: 530)
+        p.contentSize = NSSize(width: 320, height: 580)
         p.behavior = .transient
         p.animates = true
         p.delegate = self
@@ -203,7 +203,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         closePopover()
         if settingsWindow == nil {
             let win = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 320, height: 530),
+                contentRect: NSRect(x: 0, y: 0, width: 320, height: 580),
                 styleMask: [.titled, .closable, .miniaturizable],
                 backing: .buffered,
                 defer: false

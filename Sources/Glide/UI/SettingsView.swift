@@ -27,8 +27,9 @@ public struct SettingsView: View {
             .padding(.bottom, 12)
 
             // Settings Content List
-            VStack(alignment: .leading, spacing: 14) {
-                // Section: Edge Gestures
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 14) {
+                    // Section: Edge Gestures
                 VStack(alignment: .leading, spacing: 8) {
                     Text("Edge Gestures")
                         .font(.system(size: 12, weight: .bold))
@@ -181,8 +182,10 @@ public struct SettingsView: View {
                 }
             }
             .padding(.horizontal, 16)
+            .padding(.bottom, 6)
+        }
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 4)
 
             Divider()
 
