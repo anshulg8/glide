@@ -192,11 +192,19 @@ public struct SettingsView: View {
             // Footer
             HStack {
                 Button(action: onBack) {
-                    HStack(spacing: 4) {
+                    HStack(spacing: 5) {
                         Image(systemName: "chevron.left")
                             .font(.system(size: 11, weight: .semibold))
                         Text("Back")
                             .font(.system(size: 13, weight: .medium))
+
+                        Text("⌘,")
+                            .font(.system(size: 10, weight: .semibold, design: .rounded))
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal, 4)
+                            .padding(.vertical, 1.5)
+                            .background(Color.primary.opacity(0.06))
+                            .clipShape(RoundedRectangle(cornerRadius: 3.5, style: .continuous))
                     }
                     .foregroundColor(.primary)
                 }
