@@ -96,7 +96,10 @@ public final class GestureConfiguration {
     }
 
     public var appearanceMode: String {
-        didSet { UserDefaults.standard.set(appearanceMode, forKey: Self.appearanceKey) }
+        didSet {
+            UserDefaults.standard.set(appearanceMode, forKey: Self.appearanceKey)
+            NotificationCenter.default.post(name: Notification.Name("GlideAppearanceChanged"), object: nil)
+        }
     }
 
     public var autoCheckUpdates: Bool {

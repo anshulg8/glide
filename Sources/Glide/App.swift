@@ -36,6 +36,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
         setupStatusItem()
         setupPopover()
+        setupMainMenu()
+        installLocalKeyMonitor()
+        updateAppearance()
+
+        NotificationCenter.default.addObserver(
+            forName: Notification.Name("GlideAppearanceChanged"),
+            object: nil,
+            queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in
+                self?.updateAppearance()
+            }
+        }
 
         // Start trackpad gesture manager
         TrackpadGestureManager.shared.start()
@@ -51,7 +64,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
-        removeEventMonitors()
+        removeGlobalClickMonitor()
+        if let m = localKeyMonitor {
+            NSEvent.removeMonitor(m)
+            localKeyMonitor = nil
+        }
         TrackpadGestureManager.shared.stop()
     }
 
@@ -134,18 +151,19 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private func openPopover(button: NSStatusBarButton) {
         guard let p = popover else { return }
+        updateAppearance()
         // Always reset to main tab when opening
         NotificationCenter.default.post(name: Notification.Name("GlideResetToMain"), object: nil)
         p.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         p.contentViewController?.view.window?.makeKey()
-        installEventMonitors()
+        installGlobalClickMonitor()
     }
 
     func closePopover() {
         lastCloseTime = ProcessInfo.processInfo.systemUptime
         guard let p = popover else { return }
         p.close()
-        removeEventMonitors()
+        removeGlobalClickMonitor()
         NotificationCenter.default.post(name: Notification.Name("GlideResetToMain"), object: nil)
     }
 
@@ -153,14 +171,91 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     func popoverDidClose(_ notification: Notification) {
         lastCloseTime = ProcessInfo.processInfo.systemUptime
-        removeEventMonitors()
+        removeGlobalClickMonitor()
         NotificationCenter.default.post(name: Notification.Name("GlideResetToMain"), object: nil)
     }
 
-    // MARK: - Outside Click & Key Dismiss Monitors
+    // MARK: - Appearance & Theme Synchronization
 
-    private func installEventMonitors() {
-        removeEventMonitors()
+    func updateAppearance() {
+        let mode = GestureConfiguration.shared.appearanceMode
+        let appKitAppearance: NSAppearance? = switch mode {
+        case "light": NSAppearance(named: .aqua)
+        case "dark": NSAppearance(named: .darkAqua)
+        default: nil
+        }
+
+        popover?.appearance = appKitAppearance
+        aboutWindow?.appearance = appKitAppearance
+        settingsWindow?.appearance = appKitAppearance
+    }
+
+    // MARK: - Main Menu & Keyboard Monitors
+
+    private func setupMainMenu() {
+        let mainMenu = NSMenu()
+        let appMenuItem = NSMenuItem()
+        let appMenu = NSMenu(title: "Glide")
+
+        let aboutItem = NSMenuItem(title: "About Glide", action: #selector(openAboutWindow), keyEquivalent: "")
+        let settingsItem = NSMenuItem(title: "Settings…", action: #selector(openSettingsWindow), keyEquivalent: ",")
+        let closeItem = NSMenuItem(title: "Close Window", action: #selector(closeActiveWindow), keyEquivalent: "w")
+        let quitItem = NSMenuItem(title: "Quit Glide", action: #selector(requestQuitConfirmation), keyEquivalent: "q")
+
+        appMenu.addItem(aboutItem)
+        appMenu.addItem(settingsItem)
+        appMenu.addItem(NSMenuItem.separator())
+        appMenu.addItem(closeItem)
+        appMenu.addItem(NSMenuItem.separator())
+        appMenu.addItem(quitItem)
+
+        appMenuItem.submenu = appMenu
+        mainMenu.addItem(appMenuItem)
+        NSApp.mainMenu = mainMenu
+    }
+
+    private func installLocalKeyMonitor() {
+        if localKeyMonitor != nil { return }
+
+        // Persistent local monitor: handles ⌘Q, ⌘W, ⌘,, and Escape across all Glide windows and popovers
+        localKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self else { return event }
+
+            let isCmd = event.modifierFlags.contains(.command)
+            let char = event.charactersIgnoringModifiers?.lowercased()
+
+            // ⌘Q: Request quit with confirmation dialog
+            if isCmd && char == "q" {
+                self.requestQuitConfirmation()
+                return nil
+            }
+
+            // ⌘W: Close frontmost window or popover
+            if isCmd && char == "w" {
+                self.closeActiveWindow()
+                return nil
+            }
+
+            // ⌘,: Toggle Settings
+            if isCmd && char == "," {
+                NotificationCenter.default.post(name: Notification.Name("GlideToggleSettings"), object: nil)
+                return nil
+            }
+
+            // Escape: Dismiss active window or popover
+            if event.keyCode == 53 {
+                self.closeActiveWindow()
+                return nil
+            }
+
+            return event
+        }
+    }
+
+    // MARK: - Outside Click Monitor
+
+    private func installGlobalClickMonitor() {
+        removeGlobalClickMonitor()
 
         // Global monitor: dismisses popover when user clicks outside
         globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
@@ -187,39 +282,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
                 self.closePopover()
             }
         }
-
-        // Local monitor: dismisses popover on Escape key, handles ⌘, for Settings
-        localKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
-            guard let self, let p = self.popover, p.isShown else { return event }
-
-            // ⌘, shortcut to toggle Settings
-            if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "," {
-                NotificationCenter.default.post(name: Notification.Name("GlideToggleSettings"), object: nil)
-                return nil
-            }
-
-            if event.keyCode == 53 { // Escape
-                DispatchQueue.main.async {
-                    self.closePopover()
-                }
-                return nil
-            }
-            return event
-        }
     }
 
-    private func removeEventMonitors() {
+    private func removeGlobalClickMonitor() {
         if let m = globalClickMonitor {
             NSEvent.removeMonitor(m)
             globalClickMonitor = nil
         }
-        if let m = localKeyMonitor {
-            NSEvent.removeMonitor(m)
-            localKeyMonitor = nil
-        }
     }
 
-    // MARK: - Context Menu & Windows
+    // MARK: - Context Menu & Actions
 
     private func showContextMenu(button: NSStatusBarButton) {
         let menu = NSMenu()
@@ -227,7 +299,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         menu.addItem(NSMenuItem(title: "Check for Updates…", action: #selector(checkForUpdates), keyEquivalent: ""))
         menu.addItem(NSMenuItem(title: "About Glide…", action: #selector(openAboutWindow), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit Glide", action: #selector(quitApp), keyEquivalent: "q"))
+        menu.addItem(NSMenuItem(title: "Quit Glide", action: #selector(requestQuitConfirmation), keyEquivalent: "q"))
         statusItem?.menu = menu
         button.performClick(nil)
         statusItem?.menu = nil
@@ -236,6 +308,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     @objc func checkForUpdates() {
         closePopover()
         UpdateChecker.shared.checkForUpdates(explicit: true)
+    }
+
+    @objc func closeActiveWindow() {
+        if let win = aboutWindow, win.isVisible {
+            win.close()
+            return
+        }
+        if let win = settingsWindow, win.isVisible {
+            win.close()
+            return
+        }
+        if let p = popover, p.isShown {
+            closePopover()
+            return
+        }
     }
 
     @objc func openSettingsWindow() {
@@ -259,6 +346,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             win.contentView = hosting
             settingsWindow = win
         }
+        updateAppearance()
         settingsWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
@@ -267,7 +355,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         closePopover()
         if aboutWindow == nil {
             let win = NSWindow(
-                contentRect: NSRect(x: 0, y: 0, width: 340, height: 300),
+                contentRect: NSRect(x: 0, y: 0, width: 340, height: 310),
                 styleMask: [.titled, .closable],
                 backing: .buffered,
                 defer: false
@@ -279,12 +367,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             win.contentView = hosting
             aboutWindow = win
         }
+        updateAppearance()
         aboutWindow?.center()
         aboutWindow?.makeKeyAndOrderFront(nil)
         NSApp.activate(ignoringOtherApps: true)
     }
 
     @objc func quitApp() {
-        NSApp.terminate(nil)
+        requestQuitConfirmation()
+    }
+
+    @objc func requestQuitConfirmation() {
+        let isAnyViewVisible = (popover?.isShown == true) || (aboutWindow?.isVisible == true) || (settingsWindow?.isVisible == true)
+        if isAnyViewVisible {
+            NotificationCenter.default.post(name: Notification.Name("GlideRequestQuitConfirmation"), object: nil)
+        } else {
+            let alert = NSAlert()
+            alert.messageText = "Quit Glide?"
+            alert.informativeText = "Trackpad edge gestures will stop working until you relaunch Glide."
+            alert.alertStyle = .warning
+            alert.addButton(withTitle: "Quit Glide")
+            alert.addButton(withTitle: "Cancel")
+            NSApp.activate(ignoringOtherApps: true)
+            if alert.runModal() == .alertFirstButtonReturn {
+                NSApp.terminate(nil)
+            }
+        }
     }
 }

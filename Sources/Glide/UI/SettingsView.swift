@@ -243,7 +243,7 @@ public struct SettingsView: View {
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
-                .help("Quit Glide")
+                .help("Quit Glide (⌘Q)")
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
@@ -256,6 +256,9 @@ public struct SettingsView: View {
             Button("Cancel", role: .cancel) {}
         } message: {
             Text("Trackpad edge gestures will stop working until you relaunch Glide.")
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("GlideRequestQuitConfirmation"))) { _ in
+            showQuitConfirmation = true
         }
     }
 

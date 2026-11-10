@@ -5,9 +5,19 @@ import AppKit
 public struct AboutView: View {
     var onClose: () -> Void
     @ObservedObject private var updateChecker = UpdateChecker.shared
+    @State private var showQuitConfirmation: Bool = false
+    private var config = GestureConfiguration.shared
 
     public init(onClose: @escaping () -> Void) {
         self.onClose = onClose
+    }
+
+    private var colorScheme: ColorScheme? {
+        switch config.appearanceMode {
+        case "light": return .light
+        case "dark": return .dark
+        default: return nil
+        }
     }
 
     public var body: some View {
@@ -144,9 +154,21 @@ public struct AboutView: View {
             .padding(.bottom, 6)
         }
         .tint(Color.glideAccent)
+        .preferredColorScheme(colorScheme)
         .padding(.horizontal, 20)
         .padding(.vertical, 16)
         .frame(width: 340)
+        .alert("Quit Glide?", isPresented: $showQuitConfirmation) {
+            Button("Quit Glide", role: .destructive) {
+                NSApp.terminate(nil)
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Trackpad edge gestures will stop working until you relaunch Glide.")
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("GlideRequestQuitConfirmation"))) { _ in
+            showQuitConfirmation = true
+        }
     }
 }
 

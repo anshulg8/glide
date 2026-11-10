@@ -89,6 +89,11 @@ public struct MenuBarPopupView: View {
         .onReceive(NotificationCenter.default.publisher(for: NSPopover.didCloseNotification)) { _ in
             showSettings = false
         }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("GlideRequestQuitConfirmation"))) { _ in
+            if !showSettings {
+                showQuitConfirmation = true
+            }
+        }
         .frame(width: 320, height: 580)
     }
 
@@ -413,7 +418,7 @@ public struct MenuBarPopupView: View {
                         .foregroundColor(.secondary)
                 }
                 .buttonStyle(.plain)
-                .help("Quit Glide")
+                .help("Quit Glide (⌘Q)")
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
