@@ -41,13 +41,19 @@ Glide was engineered with an uncompromising focus on native speed, simplicity, a
 
 ---
 
-## 📥 Direct Download (No Xcode Required)
+## 📥 Direct Download & Installation
 
 You do **not** need to compile the app yourself to use Glide:
 
 1. Download the latest **[`Glide.zip`](https://github.com/anshulg8/glide/releases/latest)** from GitHub Releases.
-2. Unzip the file and drag **`Glide.app`** into your **Applications** folder.
-3. Launch `Glide.app` (see the [First Launch Note](#-first-launch-gatekeeper-notice) below).
+2. Double-click `Glide.zip` to extract **`Glide.app`**.
+3. **Move to Applications**:
+   - Drag `Glide.app` into your **Applications** folder.
+   - *(Or open it directly in Downloads — Glide will automatically detect this on launch and offer to move itself to Applications for you!)*
+4. **Open for the First Time (Gatekeeper)**:
+   - Because Glide is free open-source software and not notarized through a paid Apple Developer subscription ($99/yr), macOS will ask to confirm on first launch.
+   - Simply **Right-click** (or Control-click) `Glide.app` in Applications and choose **Open**, then click **Open** on the confirmation dialog. (You only have to do this once).
+   - *Alternative (Terminal)*: Run `xattr -cr /Applications/Glide.app`
 
 ---
 

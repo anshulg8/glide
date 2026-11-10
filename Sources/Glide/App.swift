@@ -24,6 +24,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         AppDelegate.shared = self
 
+        // Offer to move to /Applications if running from Downloads/Desktop
+        if InstallToApplications.promptAndMoveIfNeeded() {
+            return
+        }
+
         // Ensure accessory app without dock icon
         NSApp.setActivationPolicy(.accessory)
 
