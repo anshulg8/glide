@@ -83,23 +83,30 @@ Glide communicates directly with Apple's low-level Multitouch and Display framew
 
 ---
 
-## 🛡️ First Launch (Gatekeeper Notice)
+## 🛡️ First Launch (Gatekeeper Notice on macOS 15 Sequoia / Sonoma)
 
-Because Glide is a free, community open-source utility and is not notarized through a paid Apple Developer subscription ($99/yr), macOS Gatekeeper may show a warning on first launch:
-> *"Glide cannot be opened because Apple cannot check it for malicious software."*
+Because Glide is a free, open-source utility and is not notarized through a paid Apple Developer subscription ($99/year), macOS Gatekeeper displays a warning on first launch when downloaded from the internet:
+> *"Glide cannot be opened because Apple cannot check it for malicious software."* (with options: *Done* / *Move to Trash*)
 
-You only need to approve it once using either method:
+This is standard macOS Gatekeeper behavior for all open-source software. You only need to approve it **once** using either method:
 
-### Method 1: Right-Click (Easiest)
-1. Open your **Applications** folder in Finder.
-2. **Right-click** (or Control-click) `Glide.app` and choose **Open**.
-3. In the dialog that appears, click **Open**.
+### Method 1: System Settings (Standard macOS 15 Sequoia flow)
+1. Double-click `Glide.app`. When the warning appears, click **Done** (or *Cancel*).
+2. Open **System Settings** → **Privacy & Security**.
+3. Scroll down to the **Security** section.
+4. You will see: *"Glide" was blocked from use because it is not from an identified developer.*
+5. Click **Open Anyway**, authenticate with Touch ID / password, and click **Open**.
 
-### Method 2: Terminal One-Liner
-Open Terminal and remove the quarantine attribute:
+### Method 2: Terminal One-Liner (Fastest)
+Open Terminal and remove the browser download quarantine attribute:
 ```bash
+# If you moved it to Applications:
 xattr -cr /Applications/Glide.app
+
+# Or if it's still in Downloads:
+xattr -cr ~/Downloads/Glide.app
 ```
+Then double-click `Glide.app` — it will open immediately!
 
 ---
 
