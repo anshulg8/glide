@@ -122,21 +122,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             return
         }
 
-        // If the popover is currently shown, or if it just closed within the last 0.25s due to this click:
+        let isVisible = p.isShown && (p.contentViewController?.view.window?.isVisible == true)
         let timeSinceClose = ProcessInfo.processInfo.systemUptime - lastCloseTime
-        if p.isShown || timeSinceClose < 0.25 {
-            closePopover()
-            return
-        }
 
+        if isVisible || timeSinceClose < 0.25 {
+            closePopover()
+        } else {
+            openPopover(button: button)
+        }
+    }
+
+    private func openPopover(button: NSStatusBarButton) {
+        guard let p = popover else { return }
         p.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
         p.contentViewController?.view.window?.makeKey()
         installEventMonitors()
     }
 
     func closePopover() {
-        guard let p = popover, p.isShown else { return }
-        p.performClose(nil)
+        lastCloseTime = ProcessInfo.processInfo.systemUptime
+        guard let p = popover else { return }
+        p.close()
         removeEventMonitors()
     }
 
@@ -154,13 +160,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
         // Global monitor: dismisses popover when user clicks outside
         globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-            guard let self, let p = self.popover, p.isShown else { return }
+            guard let self, let p = self.popover else { return }
+            guard p.isShown && (p.contentViewController?.view.window?.isVisible == true) else { return }
 
             let mouseLoc = NSEvent.mouseLocation
 
             // If click is on the status item button itself, ignore (togglePopover handles it)
             if let button = self.statusItem?.button, let win = button.window {
-                let buttonScreenRect = win.convertToScreen(button.bounds)
+                let rectInWin = button.convert(button.bounds, to: nil)
+                let buttonScreenRect = win.convertToScreen(rectInWin)
                 if buttonScreenRect.contains(mouseLoc) {
                     return
                 }
