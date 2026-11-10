@@ -11,8 +11,9 @@
 <p align="center">
   <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.9+-FA7343.svg?logo=swift&logoColor=white" alt="Swift 5.9+"></a>
   <a href="https://apple.com/macos"><img src="https://img.shields.io/badge/macOS-14.0+-000000.svg?logo=apple&logoColor=white" alt="macOS 14+"></a>
-  <img src="https://img.shields.io/badge/Permissions-Zero_Required-brightgreen.svg" alt="Zero Permissions">
+  <img src="https://img.shields.io/badge/App_Size-<1_MB-success.svg" alt="App Size < 1 MB">
   <img src="https://img.shields.io/badge/Dependencies-0-success.svg" alt="Zero Dependencies">
+  <img src="https://img.shields.io/badge/Permissions-Zero_Required-brightgreen.svg" alt="Zero Permissions">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
 </p>
 
@@ -25,6 +26,18 @@
 Everyone is welcome to use, study, customize, fork, and contribute to this project. No paywalls, no telemetry, no background daemons, and zero third-party dependencies.
 
 Created and maintained with ❤️ by **[Anshul Garg](http://anshulgarg.in/)**.
+
+---
+
+## ⚡ Lean, Fast & Zero Bloat
+
+Glide was engineered with an uncompromising focus on native speed, simplicity, and minimal disk footprint:
+
+- 🪶 **Under 1 MB on Disk**: The entire uncompressed `Glide.app` bundle is only **~570 KB** (and the download zip is just **~325 KB**). It takes virtually unnoticeable space on your SSD.
+- 🚫 **Zero Third-Party Dependencies**: Built 100% in pure native Swift with no external pods, packages, or bloat. No Electron, no Chromium web views, and no heavy runtimes.
+- ⏱️ **0.0% Idle CPU**: Completely event-driven via direct Apple Multitouch contact callbacks. When you're not actively sliding along the edges, Glide sleeps at 0% CPU and preserves battery.
+- 🧠 **Minimal RAM Footprint**: Consumes only standard AppKit/SwiftUI system memory (~15–20 MB).
+- ⚡ **Instant Launch**: Starts in milliseconds and runs quietly in the macOS menu bar.
 
 ---
 
