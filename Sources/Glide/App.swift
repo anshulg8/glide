@@ -13,6 +13,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private var globalClickMonitor: Any?
     private var localKeyMonitor: Any?
+    private var lastCloseTime: TimeInterval = 0
 
     static func main() {
         let app = NSApplication.shared
@@ -67,7 +68,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         button.imagePosition = .imageOnly
         button.target = self
         button.action = #selector(togglePopover(_:))
-        button.sendAction(on: [.leftMouseDown, .rightMouseDown, .rightMouseUp])
+        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
     }
 
     private func createMenuBarIcon() -> NSImage {
@@ -116,18 +117,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         guard let button = statusItem?.button, let p = popover else { return }
 
         let currentEvent = NSApp.currentEvent
-        if currentEvent?.type == .rightMouseDown || currentEvent?.type == .rightMouseUp {
+        if currentEvent?.type == .rightMouseUp {
             showContextMenu(button: button)
             return
         }
 
-        if p.isShown {
+        // If the popover is currently shown, or if it just closed within the last 0.25s due to this click:
+        let timeSinceClose = ProcessInfo.processInfo.systemUptime - lastCloseTime
+        if p.isShown || timeSinceClose < 0.25 {
             closePopover()
-        } else {
-            p.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
-            p.contentViewController?.view.window?.makeKey()
-            installEventMonitors()
+            return
         }
+
+        p.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        p.contentViewController?.view.window?.makeKey()
+        installEventMonitors()
     }
 
     func closePopover() {
@@ -139,6 +143,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     // MARK: - NSPopoverDelegate
 
     func popoverDidClose(_ notification: Notification) {
+        lastCloseTime = ProcessInfo.processInfo.systemUptime
         removeEventMonitors()
     }
 
@@ -147,29 +152,27 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private func installEventMonitors() {
         removeEventMonitors()
 
-        // Delay monitor installation slightly so the opening click does not immediately dismiss
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
+        // Global monitor: dismisses popover when user clicks outside
+        globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
             guard let self, let p = self.popover, p.isShown else { return }
 
-            // Global monitor: dismisses popover when user clicks outside
-            self.globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
-                guard let self, let p = self.popover, p.isShown else { return }
+            let mouseLoc = NSEvent.mouseLocation
 
-                let mouseLoc = NSEvent.mouseLocation
-
-                // Ignore clicks on the status item button itself (handled by button action)
-                if let buttonWin = self.statusItem?.button?.window, buttonWin.frame.contains(mouseLoc) {
+            // If click is on the status item button itself, ignore (togglePopover handles it)
+            if let button = self.statusItem?.button, let win = button.window {
+                let buttonScreenRect = win.convertToScreen(button.bounds)
+                if buttonScreenRect.contains(mouseLoc) {
                     return
                 }
+            }
 
-                // Ignore clicks inside the popover window
-                if let popWin = p.contentViewController?.view.window, popWin.frame.contains(mouseLoc) {
-                    return
-                }
+            // If click is inside the popover window, do not dismiss
+            if let popWin = p.contentViewController?.view.window, popWin.frame.contains(mouseLoc) {
+                return
+            }
 
-                DispatchQueue.main.async {
-                    self.closePopover()
-                }
+            DispatchQueue.main.async {
+                self.closePopover()
             }
         }
 
