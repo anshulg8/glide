@@ -283,10 +283,10 @@ public struct MenuBarPopupView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 10) {
                             Image(systemName: "gauge.with.needle")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.white)
                                 .frame(width: 28, height: 28)
-                                .background(Color.primary.opacity(0.06))
+                                .background(Color(red: 0.42, green: 0.33, blue: 0.96))
                                 .clipShape(Circle())
 
                             Text("Sensitivity")
@@ -317,10 +317,10 @@ public struct MenuBarPopupView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 10) {
                             Image(systemName: "arrow.left.and.right")
-                                .font(.system(size: 14))
-                                .foregroundColor(.secondary)
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(.white)
                                 .frame(width: 28, height: 28)
-                                .background(Color.primary.opacity(0.06))
+                                .background(Color(red: 0.42, green: 0.33, blue: 0.96))
                                 .clipShape(Circle())
 
                             Text("Edge Width")
