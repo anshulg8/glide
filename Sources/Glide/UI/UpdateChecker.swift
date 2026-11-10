@@ -1,20 +1,22 @@
 import Foundation
 import AppKit
 
-/// Simple, zero-dependency update checker using GitHub's public Releases API.
+/// Simple, zero-dependency update checker and in-app installer using GitHub's public Releases API.
 @MainActor
 public final class UpdateChecker: ObservableObject {
     public static let shared = UpdateChecker()
 
     @Published public private(set) var isChecking: Bool = false
+    @Published public private(set) var isUpdating: Bool = false
     @Published public private(set) var availableUpdateVersion: String? = nil
 
     private let repoOwner = "anshulg8"
     private let repoName = "glide"
+    private var progressWindow: NSWindow?
 
     private init() {}
 
-    /// Current version from Info.plist (defaults to "1.0.0").
+    /// Current version from Info.plist (defaults to "1.0.1").
     public var currentVersion: String {
         if let ver = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, !ver.isEmpty {
             return ver
@@ -25,7 +27,7 @@ public final class UpdateChecker: ObservableObject {
     /// Checks for updates against GitHub Releases.
     /// - Parameter explicit: If `true`, shows "Up to date" or error dialogs. If `false`, only alerts when an update is found.
     public func checkForUpdates(explicit: Bool = true) {
-        guard !isChecking else { return }
+        guard !isChecking && !isUpdating else { return }
         isChecking = true
 
         Task {
@@ -119,15 +121,179 @@ public final class UpdateChecker: ObservableObject {
         return try decoder.decode(GitHubRelease.self, from: data)
     }
 
+    // MARK: - In-App Update & Seamless Installation
+
+    public func installUpdate(from downloadUrlString: String, newVersion: String, releaseUrl: String) {
+        guard let downloadUrl = URL(string: downloadUrlString) else {
+            if let fallback = URL(string: releaseUrl) {
+                NSWorkspace.shared.open(fallback)
+            }
+            return
+        }
+
+        isUpdating = true
+        showProgressWindow(version: newVersion)
+
+        Task {
+            do {
+                try await performInAppUpdate(from: downloadUrl)
+            } catch {
+                hideProgressWindow()
+                self.isUpdating = false
+                showUpdateFailedAlert(error: error, releaseUrl: releaseUrl)
+            }
+        }
+    }
+
+    private func performInAppUpdate(from url: URL) async throws {
+        // 1. Download zip file natively via URLSession (does NOT attach com.apple.quarantine)
+        let (tempZipURL, response) = try await URLSession.shared.download(from: url)
+        guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
+            throw URLError(.badServerResponse)
+        }
+
+        let fileManager = FileManager.default
+        let tempDir = fileManager.temporaryDirectory.appendingPathComponent("glide_update_\(UUID().uuidString)")
+        try fileManager.createDirectory(at: tempDir, withIntermediateDirectories: true)
+        defer {
+            try? fileManager.removeItem(at: tempDir)
+            try? fileManager.removeItem(at: tempZipURL)
+        }
+
+        let zipDestination = tempDir.appendingPathComponent("Glide.zip")
+        try fileManager.moveItem(at: tempZipURL, to: zipDestination)
+
+        // 2. Extract using native ditto (preserves permissions, links, and resource forks)
+        let extractedDir = tempDir.appendingPathComponent("extracted")
+        try fileManager.createDirectory(at: extractedDir, withIntermediateDirectories: true)
+        let dittoResult = runShell("/usr/bin/ditto", ["-x", "-k", zipDestination.path, extractedDir.path])
+        guard dittoResult == 0 else {
+            throw NSError(
+                domain: "UpdateChecker",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to extract update package."]
+            )
+        }
+
+        let extractedAppURL = extractedDir.appendingPathComponent("Glide.app")
+        guard fileManager.fileExists(atPath: extractedAppURL.path) else {
+            throw NSError(
+                domain: "UpdateChecker",
+                code: 2,
+                userInfo: [NSLocalizedDescriptionKey: "Extracted update is missing Glide.app."]
+            )
+        }
+
+        // 3. Remove quarantine attribute completely
+        _ = runShell("/usr/bin/xattr", ["-cr", extractedAppURL.path])
+
+        // 4. Re-sign ad-hoc on this machine
+        _ = runShell("/usr/bin/codesign", ["--force", "--deep", "--sign", "-", extractedAppURL.path])
+
+        // 5. Target install path: prefer current bundle location, or /Applications/Glide.app
+        let currentBundlePath = Bundle.main.bundleURL.path
+        let targetAppPath: String
+        if currentBundlePath.hasPrefix("/Applications/") {
+            targetAppPath = currentBundlePath
+        } else if fileManager.fileExists(atPath: "/Applications/Glide.app") {
+            targetAppPath = "/Applications/Glide.app"
+        } else {
+            targetAppPath = currentBundlePath
+        }
+
+        // 6. Replace target bundle
+        if fileManager.fileExists(atPath: targetAppPath) {
+            do {
+                try fileManager.removeItem(atPath: targetAppPath)
+            } catch {
+                _ = runAdminScript("/bin/rm -rf \(quoted(targetAppPath))")
+            }
+        }
+
+        var copySuccess = false
+        do {
+            try fileManager.copyItem(atPath: extractedAppURL.path, toPath: targetAppPath)
+            copySuccess = true
+        } catch {
+            let copyScript = "/usr/bin/ditto \(quoted(extractedAppURL.path)) \(quoted(targetAppPath))"
+            if runAdminScript(copyScript) {
+                copySuccess = true
+            }
+        }
+
+        guard copySuccess else {
+            throw NSError(
+                domain: "UpdateChecker",
+                code: 3,
+                userInfo: [NSLocalizedDescriptionKey: "Could not replace \(targetAppPath)."]
+            )
+        }
+
+        // 7. Final quarantine clear and ad-hoc sign on destination
+        _ = runShell("/usr/bin/xattr", ["-cr", targetAppPath])
+        _ = runShell("/usr/bin/codesign", ["--force", "--deep", "--sign", "-", targetAppPath])
+
+        // 8. Spawn relaunch script and exit immediately
+        relaunchApp(at: targetAppPath)
+    }
+
+    private func relaunchApp(at path: String) {
+        let script = "sleep 0.4; open -n \(quoted(path))"
+        let process = Process()
+        process.launchPath = "/bin/sh"
+        process.arguments = ["-c", script]
+        try? process.run()
+        exit(0)
+    }
+
+    // MARK: - Progress & Alert Windows
+
+    private func showProgressWindow(version: String) {
+        let win = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 280, height: 110),
+            styleMask: [.titled],
+            backing: .buffered,
+            defer: false
+        )
+        win.center()
+        win.title = "Updating Glide"
+        win.isReleasedWhenClosed = false
+
+        let contentView = NSView(frame: NSRect(x: 0, y: 0, width: 280, height: 110))
+
+        let spinner = NSProgressIndicator(frame: NSRect(x: 24, y: 40, width: 30, height: 30))
+        spinner.style = .spinning
+        spinner.startAnimation(nil)
+        contentView.addSubview(spinner)
+
+        let titleLabel = NSTextField(labelWithString: "Updating to Glide \(version)…")
+        titleLabel.font = NSFont.systemFont(ofSize: 13, weight: .semibold)
+        titleLabel.frame = NSRect(x: 68, y: 50, width: 195, height: 20)
+        contentView.addSubview(titleLabel)
+
+        let subtitleLabel = NSTextField(labelWithString: "Downloading and installing…")
+        subtitleLabel.font = NSFont.systemFont(ofSize: 11, weight: .regular)
+        subtitleLabel.textColor = .secondaryLabelColor
+        subtitleLabel.frame = NSRect(x: 68, y: 32, width: 195, height: 18)
+        contentView.addSubview(subtitleLabel)
+
+        win.contentView = contentView
+        win.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+        self.progressWindow = win
+    }
+
+    private func hideProgressWindow() {
+        progressWindow?.close()
+        progressWindow = nil
+    }
+
     // MARK: - Version Comparison
 
-    /// Strips leading 'v', 'V', whitespace, and builds clean version string.
     private func cleanVersion(_ raw: String) -> String {
         raw.trimmingCharacters(in: CharacterSet(charactersIn: "vV \t\r\n"))
     }
 
-    /// Compares two semantic version strings (e.g. "1.0.1" vs "1.0.0").
-    /// Returns true if v1 > v2.
     public func isVersion(_ v1: String, newerThan v2: String) -> Bool {
         let p1 = v1.split(separator: ".").compactMap { Int($0) }
         let p2 = v2.split(separator: ".").compactMap { Int($0) }
@@ -154,24 +320,26 @@ public final class UpdateChecker: ObservableObject {
 
         let alert = NSAlert()
         alert.messageText = "Update Available"
-        alert.informativeText = "Glide \(newVersion) is now available (you have \(currentVersion)).\n\nWould you like to download the update?"
+        alert.informativeText = "Glide \(newVersion) is now available (you have \(currentVersion)).\n\nWould you like to install the update now? Glide will automatically download, update, and relaunch seamlessly."
         alert.alertStyle = .informational
 
-        // Buttons
-        alert.addButton(withTitle: "Download Update")
+        if downloadUrl != nil {
+            alert.addButton(withTitle: "Install & Relaunch")
+        } else {
+            alert.addButton(withTitle: "Download from GitHub")
+        }
         alert.addButton(withTitle: "View Release Notes")
         alert.addButton(withTitle: "Later")
 
         let response = alert.runModal()
         switch response {
         case .alertFirstButtonReturn:
-            // Download update (prefer direct zip download URL, fallback to release page)
-            let targetString = downloadUrl ?? releaseUrl
-            if let targetUrl = URL(string: targetString) {
-                NSWorkspace.shared.open(targetUrl)
+            if let downloadUrl = downloadUrl {
+                installUpdate(from: downloadUrl, newVersion: newVersion, releaseUrl: releaseUrl)
+            } else if let notesUrl = URL(string: releaseUrl) {
+                NSWorkspace.shared.open(notesUrl)
             }
         case .alertSecondButtonReturn:
-            // View release notes on GitHub
             if let notesUrl = URL(string: releaseUrl) {
                 NSWorkspace.shared.open(notesUrl)
             }
@@ -209,5 +377,53 @@ public final class UpdateChecker: ObservableObject {
             }
         }
     }
-}
 
+    private func showUpdateFailedAlert(error: Error, releaseUrl: String) {
+        NSApp.activate(ignoringOtherApps: true)
+
+        let alert = NSAlert()
+        alert.messageText = "Update Failed"
+        alert.informativeText = "Unable to automatically install the update: \(error.localizedDescription)\n\nYou can download the update manually from GitHub."
+        alert.alertStyle = .warning
+
+        alert.addButton(withTitle: "Download Manually")
+        alert.addButton(withTitle: "Cancel")
+
+        let response = alert.runModal()
+        if response == .alertFirstButtonReturn {
+            if let url = URL(string: releaseUrl) {
+                NSWorkspace.shared.open(url)
+            }
+        }
+    }
+
+    // MARK: - Shell Helpers
+
+    private func quoted(_ string: String) -> String {
+        return "'" + string.replacingOccurrences(of: "'", with: "'\\''") + "'"
+    }
+
+    private func runAdminScript(_ bashCommand: String) -> Bool {
+        let script = "do shell script \"\(bashCommand.replacingOccurrences(of: "\"", with: "\\\""))\" with administrator privileges"
+        var error: NSDictionary?
+        guard let asObj = NSAppleScript(source: script) else { return false }
+        _ = asObj.executeAndReturnError(&error)
+        return error == nil
+    }
+
+    @discardableResult
+    private func runShell(_ launchPath: String, _ args: [String]) -> Int32 {
+        let task = Process()
+        task.launchPath = launchPath
+        task.arguments = args
+        task.standardOutput = Pipe()
+        task.standardError = Pipe()
+        do {
+            try task.run()
+            task.waitUntilExit()
+            return task.terminationStatus
+        } catch {
+            return -1
+        }
+    }
+}
