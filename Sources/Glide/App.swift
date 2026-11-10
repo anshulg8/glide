@@ -39,9 +39,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         // Start trackpad gesture manager
         TrackpadGestureManager.shared.start()
 
-        // Check for updates in background after startup (silent unless update is found)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
-            UpdateChecker.shared.checkForUpdates(explicit: false)
+        // Check for updates in background after startup (if enabled in settings)
+        if GestureConfiguration.shared.autoCheckUpdates {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 5.0) {
+                UpdateChecker.shared.checkForUpdates(explicit: false)
+            }
         }
 
         NSLog("[Glide] Application initialized.")

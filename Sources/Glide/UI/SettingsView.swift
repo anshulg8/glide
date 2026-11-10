@@ -166,6 +166,17 @@ public struct SettingsView: View {
                             .labelsHidden()
                             .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
                         }
+
+                        // Automatically Check for Updates
+                        SettingsRow(
+                            icon: "arrow.triangle.2.circlepath",
+                            title: "Auto-Check for Updates",
+                            subtitle: "Notify when a new version is available"
+                        ) {
+                            Toggle("", isOn: $config.autoCheckUpdates)
+                                .labelsHidden()
+                                .toggleStyle(SwitchToggleStyle(tint: Color(red: 0.42, green: 0.33, blue: 0.96)))
+                        }
                     }
                 }
             }

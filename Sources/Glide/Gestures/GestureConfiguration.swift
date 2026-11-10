@@ -22,6 +22,7 @@ public final class GestureConfiguration {
     public static let requireModifierKey = "glide_require_modifier"
     public static let fineControlEnabledKey = "glide_fine_control_enabled"
     public static let appearanceKey = "glide_appearance" // "system", "light", "dark"
+    public static let autoCheckUpdatesKey = "glide_auto_check_updates"
 
     // MARK: - Defaults
     public static let defaultBrightnessEnabled: Bool = true
@@ -38,6 +39,7 @@ public final class GestureConfiguration {
     public static let defaultRequireModifier: Bool = false
     public static let defaultFineControlEnabled: Bool = true
     public static let defaultAppearance: String = "system"
+    public static let defaultAutoCheckUpdates: Bool = true
 
     // MARK: - Observable Properties with UserDefaults backing
 
@@ -97,6 +99,10 @@ public final class GestureConfiguration {
         didSet { UserDefaults.standard.set(appearanceMode, forKey: Self.appearanceKey) }
     }
 
+    public var autoCheckUpdates: Bool {
+        didSet { UserDefaults.standard.set(autoCheckUpdates, forKey: Self.autoCheckUpdatesKey) }
+    }
+
     public var isHapticFeedbackEnabled: Bool {
         get { hapticStrength > 0 }
         set { hapticStrength = newValue ? 2 : 0 }
@@ -147,6 +153,7 @@ public final class GestureConfiguration {
         self.requireModifier = defaults.object(forKey: Self.requireModifierKey) as? Bool ?? Self.defaultRequireModifier
         self.isFineControlEnabled = defaults.object(forKey: Self.fineControlEnabledKey) as? Bool ?? Self.defaultFineControlEnabled
         self.appearanceMode = defaults.string(forKey: Self.appearanceKey) ?? Self.defaultAppearance
+        self.autoCheckUpdates = defaults.object(forKey: Self.autoCheckUpdatesKey) as? Bool ?? Self.defaultAutoCheckUpdates
     }
 
     public func resetToDefaults() {
@@ -164,6 +171,7 @@ public final class GestureConfiguration {
         requireModifier = Self.defaultRequireModifier
         isFineControlEnabled = Self.defaultFineControlEnabled
         appearanceMode = Self.defaultAppearance
+        autoCheckUpdates = Self.defaultAutoCheckUpdates
     }
 }
 
