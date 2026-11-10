@@ -212,7 +212,7 @@ public struct SettingsView: View {
                         config.resetToDefaults()
                     }
                     Button("About Glide") {
-                        NSApp.orderFrontStandardAboutPanel(nil)
+                        AppDelegate.shared?.openAboutWindow()
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")

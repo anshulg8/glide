@@ -2,19 +2,28 @@ import SwiftUI
 import AppKit
 
 @main
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
+    public static private(set) var shared: AppDelegate?
+
     private var statusItem: NSStatusItem?
     private var popover: NSPopover?
     private var settingsWindow: NSWindow?
+    private var aboutWindow: NSWindow?
+
+    private var globalClickMonitor: Any?
+    private var localKeyMonitor: Any?
 
     static func main() {
         let app = NSApplication.shared
         let delegate = AppDelegate()
+        AppDelegate.shared = delegate
         app.delegate = delegate
         app.run()
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        AppDelegate.shared = self
+
         // Ensure accessory app without dock icon
         NSApp.setActivationPolicy(.accessory)
 
@@ -28,6 +37,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillTerminate(_ notification: Notification) {
+        removeEventMonitors()
         TrackpadGestureManager.shared.stop()
     }
 
@@ -84,6 +94,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         p.contentSize = NSSize(width: 320, height: 530)
         p.behavior = .transient
         p.animates = true
+        p.delegate = self
         p.contentViewController = NSHostingController(rootView: MenuBarPopupView())
         self.popover = p
     }
@@ -98,17 +109,70 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         if p.isShown {
-            p.performClose(sender)
+            closePopover()
         } else {
             p.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             p.contentViewController?.view.window?.makeKey()
             NSApp.activate(ignoringOtherApps: true)
+            installEventMonitors()
         }
     }
+
+    func closePopover() {
+        guard let p = popover, p.isShown else { return }
+        p.performClose(nil)
+        removeEventMonitors()
+    }
+
+    // MARK: - NSPopoverDelegate
+
+    func popoverDidClose(_ notification: Notification) {
+        removeEventMonitors()
+    }
+
+    // MARK: - Outside Click & Key Dismiss Monitors
+
+    private func installEventMonitors() {
+        removeEventMonitors()
+
+        // Global monitor: dismisses popover when user clicks anywhere outside the application
+        globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+            guard let self, let p = self.popover, p.isShown else { return }
+            DispatchQueue.main.async {
+                self.closePopover()
+            }
+        }
+
+        // Local monitor: dismisses popover on Escape key
+        localKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            guard let self, let p = self.popover, p.isShown else { return event }
+            if event.keyCode == 53 { // Escape
+                DispatchQueue.main.async {
+                    self.closePopover()
+                }
+                return nil
+            }
+            return event
+        }
+    }
+
+    private func removeEventMonitors() {
+        if let m = globalClickMonitor {
+            NSEvent.removeMonitor(m)
+            globalClickMonitor = nil
+        }
+        if let m = localKeyMonitor {
+            NSEvent.removeMonitor(m)
+            localKeyMonitor = nil
+        }
+    }
+
+    // MARK: - Context Menu & Windows
 
     private func showContextMenu(button: NSStatusBarButton) {
         let menu = NSMenu()
         menu.addItem(NSMenuItem(title: "Settings…", action: #selector(openSettingsWindow), keyEquivalent: ","))
+        menu.addItem(NSMenuItem(title: "About Glide…", action: #selector(openAboutWindow), keyEquivalent: ""))
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(title: "Quit Glide", action: #selector(quitApp), keyEquivalent: "q"))
         statusItem?.menu = menu
@@ -117,6 +181,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @objc func openSettingsWindow() {
+        closePopover()
         if settingsWindow == nil {
             let win = NSWindow(
                 contentRect: NSRect(x: 0, y: 0, width: 320, height: 530),
@@ -130,7 +195,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let hosting = NSHostingView(
                 rootView: SettingsView(
                     onBack: { [weak win] in win?.close() },
-                    onQuit: { NSApp.terminate(nil) }
+                    onQuit: { [weak self] in self?.quitApp() }
                 )
             )
             win.contentView = hosting
@@ -140,8 +205,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.activate(ignoringOtherApps: true)
     }
 
+    @objc func openAboutWindow() {
+        closePopover()
+        if aboutWindow == nil {
+            let win = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 300, height: 280),
+                styleMask: [.titled, .closable],
+                backing: .buffered,
+                defer: false
+            )
+            win.center()
+            win.title = "About Glide"
+            win.isReleasedWhenClosed = false
+            let hosting = NSHostingView(rootView: AboutView(onClose: { [weak win] in win?.close() }))
+            win.contentView = hosting
+            aboutWindow = win
+        }
+        aboutWindow?.center()
+        aboutWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
+    }
+
     @objc func quitApp() {
         NSApp.terminate(nil)
     }
 }
-
