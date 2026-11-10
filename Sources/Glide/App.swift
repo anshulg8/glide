@@ -67,7 +67,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         button.imagePosition = .imageOnly
         button.target = self
         button.action = #selector(togglePopover(_:))
-        button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        button.sendAction(on: [.leftMouseDown, .rightMouseDown, .rightMouseUp])
     }
 
     private func createMenuBarIcon() -> NSImage {
@@ -116,7 +116,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         guard let button = statusItem?.button, let p = popover else { return }
 
         let currentEvent = NSApp.currentEvent
-        if currentEvent?.type == .rightMouseUp {
+        if currentEvent?.type == .rightMouseDown || currentEvent?.type == .rightMouseUp {
             showContextMenu(button: button)
             return
         }
@@ -126,7 +126,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         } else {
             p.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             p.contentViewController?.view.window?.makeKey()
-            NSApp.activate(ignoringOtherApps: true)
             installEventMonitors()
         }
     }
@@ -148,11 +147,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private func installEventMonitors() {
         removeEventMonitors()
 
-        // Global monitor: dismisses popover when user clicks anywhere outside the application
-        globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+        // Delay monitor installation slightly so the opening click does not immediately dismiss
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
             guard let self, let p = self.popover, p.isShown else { return }
-            DispatchQueue.main.async {
-                self.closePopover()
+
+            // Global monitor: dismisses popover when user clicks outside
+            self.globalClickMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+                guard let self, let p = self.popover, p.isShown else { return }
+
+                let mouseLoc = NSEvent.mouseLocation
+
+                // Ignore clicks on the status item button itself (handled by button action)
+                if let buttonWin = self.statusItem?.button?.window, buttonWin.frame.contains(mouseLoc) {
+                    return
+                }
+
+                // Ignore clicks inside the popover window
+                if let popWin = p.contentViewController?.view.window, popWin.frame.contains(mouseLoc) {
+                    return
+                }
+
+                DispatchQueue.main.async {
+                    self.closePopover()
+                }
             }
         }
 
