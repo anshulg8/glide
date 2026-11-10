@@ -101,7 +101,7 @@ public struct SettingsView: View {
 
                         // Fine Control
                         SettingsRow(
-                            icon: "slider.horizontal.2",
+                            icon: "dial.low.fill",
                             iconBg: Color(red: 0.42, green: 0.33, blue: 0.96),
                             iconColor: .white,
                             title: "Fine Control",
