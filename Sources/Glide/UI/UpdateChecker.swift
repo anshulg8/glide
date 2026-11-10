@@ -16,12 +16,12 @@ public final class UpdateChecker: ObservableObject {
 
     private init() {}
 
-    /// Current version from Info.plist (defaults to "1.0.1").
+    /// Current version from Info.plist (defaults to "1.0.2").
     public var currentVersion: String {
         if let ver = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String, !ver.isEmpty {
             return ver
         }
-        return "1.0.1"
+        return "1.0.2"
     }
 
     /// Checks for updates against GitHub Releases.
