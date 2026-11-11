@@ -22,6 +22,9 @@
   <a href="https://github.com/anshulg8/glide/releases/latest/download/Glide.zip">
     <img src="https://img.shields.io/badge/⬇️_Direct_Download-Glide.zip-2ea44f?style=for-the-badge&logo=apple&logoColor=white" alt="Download Glide.zip">
   </a>
+  <a href="https://www.producthunt.com/products/glide-trackpad-edge-gestures/">
+    <img src="https://img.shields.io/badge/Product_Hunt-Support_on_Launch-DA552F?style=for-the-badge&logo=producthunt&logoColor=white" alt="Support on Product Hunt">
+  </a>
 </p>
 
 ---
