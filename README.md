@@ -11,10 +11,17 @@
 <p align="center">
   <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.9+-FA7343.svg?logo=swift&logoColor=white" alt="Swift 5.9+"></a>
   <a href="https://apple.com/macos"><img src="https://img.shields.io/badge/macOS-14.0+-000000.svg?logo=apple&logoColor=white" alt="macOS 14+"></a>
+  <a href="https://github.com/anshulg8/glide/releases/latest"><img src="https://img.shields.io/github/v/release/anshulg8/glide?color=blue&label=Release" alt="Latest Release"></a>
   <img src="https://img.shields.io/badge/App_Size-<1_MB-success.svg" alt="App Size < 1 MB">
   <img src="https://img.shields.io/badge/Dependencies-0-success.svg" alt="Zero Dependencies">
   <img src="https://img.shields.io/badge/Permissions-Zero_Required-brightgreen.svg" alt="Zero Permissions">
   <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="MIT License"></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/anshulg8/glide/releases/latest/download/Glide.zip">
+    <img src="https://img.shields.io/badge/⬇️_Direct_Download-Glide.zip-2ea44f?style=for-the-badge&logo=apple&logoColor=white" alt="Download Glide.zip">
+  </a>
 </p>
 
 ---
@@ -43,9 +50,12 @@ Glide was engineered with an uncompromising focus on native speed, simplicity, a
 
 ## 📥 Download & Quick Start
 
+### [⬇️ Direct Download Latest Release (`Glide.zip`)](https://github.com/anshulg8/glide/releases/latest/download/Glide.zip)
+*(Or browse all versions on [GitHub Releases](https://github.com/anshulg8/glide/releases))*
+
 You do **not** need to compile Glide yourself to use it:
 
-1. **Download**: Get the latest **[`Glide.zip`](https://github.com/anshulg8/glide/releases/latest)** from GitHub Releases.
+1. **Download**: Click the link above to download **[`Glide.zip`](https://github.com/anshulg8/glide/releases/latest/download/Glide.zip)**.
 2. **Install**: Double-click `Glide.zip` to extract, then drag **`Glide.app`** into your **Applications** folder.  
    *(Or open it directly in Downloads — Glide will automatically offer to move itself to Applications for you!)*
 3. **First Launch (macOS Gatekeeper)**:  
