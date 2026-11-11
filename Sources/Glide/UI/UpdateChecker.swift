@@ -77,7 +77,14 @@ public final class UpdateChecker: ObservableObject {
         }
 
         var zipAssetUrl: String? {
-            assets?.first(where: { $0.name.lowercased().hasSuffix(".zip") })?.browserDownloadUrl
+            if let asset = assets?.first(where: { $0.name.lowercased().hasSuffix(".zip") }) {
+                return asset.browserDownloadUrl
+            }
+            // If assets are empty, check if we have a valid release tag to try direct download
+            if !tagName.isEmpty {
+                return "https://github.com/anshulg8/glide/releases/download/\(tagName)/Glide.zip"
+            }
+            return nil
         }
     }
 
