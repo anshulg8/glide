@@ -31,7 +31,7 @@ public final class TrackpadGestureManager {
     private let volumeController = VolumeController.shared
     private let config = GestureConfiguration.shared
 
-    private let queue = DispatchQueue(label: "xyz.edgebar.glide.gestures", qos: .userInteractive)
+    private let queue = DispatchQueue(label: "in.anshulgarg.glide.gestures", qos: .userInteractive)
     private var activeGesture: ActiveGesture?
     private var lastTapRecord: TapRecord?
 

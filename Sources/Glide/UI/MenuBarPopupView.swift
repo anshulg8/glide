@@ -20,7 +20,7 @@ public struct GlideTrackpadIcon: View {
             HStack {
                 // Left edge bar (Brightness - orange)
                 RoundedRectangle(cornerRadius: 1.5)
-                    .fill(Color(red: 0.95, green: 0.58, blue: 0.15))
+                    .fill(Color(red: 0.98, green: 0.55, blue: 0.12))
                     .frame(width: size * 0.14, height: size * 0.55)
                     .padding(.leading, size * 0.12)
 
@@ -28,10 +28,29 @@ public struct GlideTrackpadIcon: View {
 
                 // Right edge bar (Volume - blue)
                 RoundedRectangle(cornerRadius: 1.5)
-                    .fill(Color(red: 0.2, green: 0.55, blue: 0.95))
+                    .fill(Color(red: 0.22, green: 0.55, blue: 0.98))
                     .frame(width: size * 0.14, height: size * 0.55)
                     .padding(.trailing, size * 0.12)
             }
+
+            // Central glide motion wave
+            Path { path in
+                let startX = size * 0.32
+                let endX = size * 0.68
+                let midY = size * 0.5
+                path.move(to: CGPoint(x: startX, y: midY - size * 0.08))
+                path.addCurve(
+                    to: CGPoint(x: size * 0.5, y: midY + size * 0.06),
+                    control1: CGPoint(x: startX + size * 0.08, y: midY - size * 0.12),
+                    control2: CGPoint(x: size * 0.5 - size * 0.06, y: midY + size * 0.12)
+                )
+                path.addCurve(
+                    to: CGPoint(x: endX, y: midY - size * 0.08),
+                    control1: CGPoint(x: size * 0.5 + size * 0.06, y: midY),
+                    control2: CGPoint(x: endX - size * 0.08, y: midY - size * 0.12)
+                )
+            }
+            .stroke(Color.glideAccent, style: StrokeStyle(lineWidth: max(1.2, size * 0.07), lineCap: .round))
         }
         .frame(width: size, height: size)
     }

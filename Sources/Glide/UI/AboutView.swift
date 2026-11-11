@@ -22,20 +22,13 @@ public struct AboutView: View {
 
     public var body: some View {
         VStack(spacing: 16) {
-            // Icon in soft accent container
-            ZStack {
-                RoundedRectangle(cornerRadius: 18, style: .continuous)
-                    .fill(Color.glideAccent.opacity(0.12))
-                    .frame(width: 76, height: 76)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 18, style: .continuous)
-                            .stroke(Color.glideAccent.opacity(0.25), lineWidth: 1)
-                    )
-
-                GlideTrackpadIcon(size: 50)
-            }
-            .shadow(color: Color.glideAccent.opacity(0.16), radius: 8, x: 0, y: 3)
-            .padding(.top, 4)
+            // App Icon
+            Image(nsImage: NSApp.applicationIconImage)
+                .resizable()
+                .frame(width: 76, height: 76)
+                .cornerRadius(17)
+                .shadow(color: Color.glideAccent.opacity(0.35), radius: 10, x: 0, y: 4)
+                .padding(.top, 4)
 
             // Title & Version
             VStack(spacing: 4) {

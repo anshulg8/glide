@@ -5,7 +5,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ROOT="$(pwd)"
 APP_NAME="Glide"
-BUNDLE_ID="xyz.edgebar.glide"
+BUNDLE_ID="in.anshulgarg.glide"
 APP_DIR="${ROOT}/${APP_NAME}.app"
 CONTENTS="${APP_DIR}/Contents"
 MACOS_DIR="${CONTENTS}/MacOS"
