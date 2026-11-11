@@ -6,15 +6,14 @@ public enum GestureIndicatorType {
     case volume
 }
 
-@Observable
-final class GestureOverlayModel {
-    var type: GestureIndicatorType = .brightness
-    var value: Float = 0.5
-    var isMuted: Bool = false
+final class GestureOverlayModel: ObservableObject {
+    @Published var type: GestureIndicatorType = .brightness
+    @Published var value: Float = 0.5
+    @Published var isMuted: Bool = false
 }
 
 struct GestureOverlayView: View {
-    var model: GestureOverlayModel
+    @ObservedObject var model: GestureOverlayModel
 
     var iconName: String {
         switch model.type {
@@ -123,11 +122,14 @@ public final class GestureOverlayController {
         p.backgroundColor = .clear
         p.hasShadow = false
         p.level = .statusBar
+        p.isFloatingPanel = true
+        p.hidesOnDeactivate = false
         p.ignoresMouseEvents = true
         p.isReleasedWhenClosed = false
-        p.collectionBehavior = [.canJoinAllSpaces, .stationary, .ignoresCycle, .fullScreenAuxiliary]
+        p.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
 
         let hosting = NSHostingView(rootView: GestureOverlayView(model: model))
+        hosting.frame = NSRect(x: 0, y: 0, width: 220, height: 58)
         p.contentView = hosting
         self.panel = p
     }
@@ -154,27 +156,21 @@ public final class GestureOverlayController {
         }
 
         dismissWorkItem?.cancel()
+        dismissWorkItem = nil
 
-        if !panel.isVisible {
-            panel.alphaValue = 0.0
-            panel.orderFrontRegardless()
-            NSAnimationContext.runAnimationGroup { ctx in
-                ctx.duration = 0.15
-                panel.animator().alphaValue = 1.0
-            }
-        } else {
-            panel.orderFrontRegardless()
-            panel.alphaValue = 1.0
-        }
+        // Set opacity to 1.0 immediately and order front
+        panel.alphaValue = 1.0
+        panel.orderFrontRegardless()
 
         let item = DispatchWorkItem { [weak self] in
             guard let self, let p = self.panel else { return }
             NSAnimationContext.runAnimationGroup({ ctx in
-                ctx.duration = 0.3
+                ctx.duration = 0.25
                 p.animator().alphaValue = 0.0
             }, completionHandler: {
                 if p.alphaValue == 0.0 {
                     p.orderOut(nil)
+                    p.alphaValue = 1.0
                 }
             })
         }
