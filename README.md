@@ -109,7 +109,7 @@ Glide communicates directly with Apple's low-level Multitouch and Display framew
 - **Rock-Solid Cursor Freeze**: The mouse pointer stays completely pinned and stationary during edge slides (`CGAssociateMouseAndMouseCursorPosition(0)` and per-frame `CGWarpMouseCursorPosition`), restoring seamlessly upon release without jumping.
 - **Interactive Horizontal Sliders**: The menu bar popup features space-saving horizontal Brightness and Volume tracks that you can tap or drag directly, with real-time bidirectional sync.
 - **Fine Control (`⇧ Shift` / `⌥ Option`)**: Holding Shift or Option scales adjustment speed down to `0.25×` for precision quarter-steps.
-- **Quick Mute Corner Tap**: Double-tapping the top-right corner of the trackpad toggles system mute with haptic feedback.
+- **Quick Mute Corner Tap**: Double-tapping the top corner of the trackpad toggles system mute with haptic feedback (adapts dynamically to the active volume edge when sides are swapped).
 - **Screen-Aware HUD Overlay**: Floating non-activating bezel (`NSPanel`) displaying volume/brightness icons and smooth progress bars on whichever monitor currently contains the cursor, fading after 1.2s.
 - **Click-Outside Auto-Dismiss**: The menu bar dropdown automatically dismisses whenever you click anywhere outside or press Escape.
 - **Preferences & Menu Bar UI**:

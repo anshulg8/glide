@@ -256,7 +256,7 @@ public struct MenuBarPopupView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text("Quick Mute")
                                 .font(.system(size: 13, weight: .medium))
-                            Text("Double-tap the top-right corner")
+                            Text(config.isSwapSides ? "Double-tap the top-left corner" : "Double-tap the top-right corner")
                                 .font(.system(size: 11))
                                 .foregroundColor(.secondary)
                         }
