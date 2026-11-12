@@ -244,23 +244,27 @@ public final class TrackpadGestureManager {
             let physicalTouches = touches.filter { $0.state >= 2 && $0.state <= 4 }
             guard physicalTouches.count >= 1 && physicalTouches.count <= 2 else { return }
 
-            let isCornerZone: (MTTouch) -> Bool = { t in
+            let isSwap = config.isSwapSides
+
+            // Check if touch is strictly in the active volume corner zone
+            let isVolumeCornerZone: (MTTouch) -> Bool = { t in
                 let px = t.normalized.position.x
                 let py = t.normalized.position.y
-                return (px <= edgeWidth * 1.5 || px >= (1.0 - edgeWidth * 1.5)) && py >= 0.70
+                let isVolumeSide = isSwap ? (px <= edgeWidth * 1.5) : (px >= 1.0 - edgeWidth * 1.5)
+                return isVolumeSide && py >= 0.70
             }
 
             guard let touch = physicalTouches.first(where: {
                 $0.normalized.position.x <= edgeWidth ||
                 $0.normalized.position.x >= (1.0 - edgeWidth) ||
-                (config.isQuickMuteEnabled && isCornerZone($0))
+                (config.isQuickMuteEnabled && isVolumeCornerZone($0))
             }) else { return }
 
             let x = touch.normalized.position.x
             let y = touch.normalized.position.y
 
-            let isCorner = (x <= edgeWidth * 1.5 || x >= (1.0 - edgeWidth * 1.5)) && y >= 0.70
-            let canTrackForQuickMute = config.isQuickMuteEnabled && isCorner
+            let isVolumeCorner = isSwap ? (x <= edgeWidth * 1.5 && y >= 0.70) : (x >= (1.0 - edgeWidth * 1.5) && y >= 0.70)
+            let canTrackForQuickMute = config.isQuickMuteEnabled && isVolumeCorner
 
             // Check if modifier key is required
             if config.requireModifier && !canTrackForQuickMute {
@@ -282,7 +286,6 @@ public final class TrackpadGestureManager {
             }
 
             let isLeft = x <= 0.5
-            let isSwap = config.isSwapSides
 
             // Determine target control based on edge side and swap setting
             let targetControl: ControlType
@@ -323,32 +326,29 @@ public final class TrackpadGestureManager {
         let x = touch.normalized.position.x
         let y = touch.normalized.position.y
 
-        // Top corner zones: right corner (x >= 1.0 - edgeWidth * 1.5) or left corner (x <= edgeWidth * 1.5), upper zone (y >= 0.70)
+        // Strictly the active Volume corner: Top-Left when sides swapped, Top-Right by default
         let isRightCorner = x >= (1.0 - edgeWidth * 1.5) && y >= 0.70
         let isLeftCorner = x <= (edgeWidth * 1.5) && y >= 0.70
-        guard isRightCorner || isLeftCorner else { return }
+        let isVolumeCorner = config.isSwapSides ? isLeftCorner : isRightCorner
+        guard isVolumeCorner else { return }
 
         let now = ProcessInfo.processInfo.systemUptime
         if let last = lastTapRecord, (now - last.time) <= 0.45 {
-            // Require both taps to be on the same corner side
-            let sameSide = (last.x < 0.5 && x < 0.5) || (last.x >= 0.5 && x >= 0.5)
-            if sameSide {
-                lastTapRecord = nil
-                let newMuted = volumeController.toggleMute()
-                let currentVol = volumeController.currentVolume()
+            lastTapRecord = nil
+            let newMuted = volumeController.toggleMute()
+            let currentVol = volumeController.currentVolume()
 
-                if config.isHapticFeedbackEnabled {
-                    bridge.performHaptic(actuationID: 6)
-                }
-
-                if config.showOverlay {
-                    DispatchQueue.main.async {
-                        GestureOverlayController.shared.show(type: .volume, value: currentVol, isMuted: newMuted)
-                    }
-                }
-                NSLog("[Glide] Quick Mute toggled: muted=\(newMuted)")
-                return
+            if config.isHapticFeedbackEnabled {
+                bridge.performHaptic(actuationID: 6)
             }
+
+            if config.showOverlay {
+                DispatchQueue.main.async {
+                    GestureOverlayController.shared.show(type: .volume, value: currentVol, isMuted: newMuted)
+                }
+            }
+            NSLog("[Glide] Quick Mute toggled: muted=\(newMuted)")
+            return
         }
 
         lastTapRecord = TapRecord(time: now, x: x, y: y)
